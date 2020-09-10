@@ -1,0 +1,43 @@
+.help-menu {
+	margin-top: auto;
+	position: absolute;
+	bottom: 48px;
+	left: 120px;
+	width: 260px;
+	color: #fff;
+	background-color: #333;
+	list-style-type: none;
+	padding: 6px 0;
+	box-shadow: 0px 4px 8px -4px black;
+	z-index: 1;
+}
+
+.help-item {
+	height: 36px;
+	background-position: 16px 50%;
+	padding-left: 56px;
+	background-size: 24px;
+	background-repeat: no-repeat;
+	margin: 4px 0;
+	cursor: default;
+	display: flex;
+	align-items: center;
+	transition: 200ms ease;
+}
+
+.help-item:hover {
+	background-color: rgba(255, 255, 255, 0.05);
+}
+
+.help-item.user-guides {
+	background-image: url(./icons/user-guides.svg);
+}
+.help-item.feature-request {
+	background-image: url(./icons/feature-request.svg);
+}
+.help-item.bug-report {
+	background-image: url(./icons/bug-report.svg);
+}
+.help-item.sign-out {
+	background-image: url(./icons/sign-out.svg);
+}

@@ -1,0 +1,55 @@
+.button-loader {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	border: 2px solid transparent;
+	border-top-color: #fff;
+	animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.card-action {
+	padding: 11px 39px;
+	font-weight: 800;
+	color: #fff;
+	text-transform: capitalize;
+	background-color: var(--primary);
+	cursor: default;
+	border: none;
+	box-shadow: inset 0 0 0 3px var(--surfaceTwo);
+}
+
+.card-sub {
+	width: 46px;
+	height: 46px;
+	display: grid;
+	place-items: center;
+	margin-right: 6px;
+	background-color: var(--primary);
+	cursor: default;
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	background-size: 24px;
+	border: none;
+	box-shadow: inset 0 0 0 3px var(--surfaceTwo);
+}
+
+.card-sub.delete {
+	background-image: url(./icons/delete.svg);
+}
+
+.card-sub.archive {
+	background-image: url(./icons/archive.svg);
+}
+
+.card-sub.publish {
+	background-image: url(./icons/publish.svg);
+}
