@@ -1,16 +1,32 @@
-const fieldStructures = [
-	{ type: 'text', name: 'text', multiline: false },
-	{ type: 'text', name: 'text-multiline', multiline: true },
-	{ type: 'number', name: 'number' },
-	{ type: 'email', name: 'email' },
-	{ type: 'phone', name: 'phone' },
-	{ type: 'url', name: 'url' },
-	{ type: 'date', name: 'date', time: false },
-	{ type: 'date', name: 'date-time', time: true },
-	{ type: 'option', name: 'option', options: [ '1', '2', '3' ], multi: false },
-	{ type: 'option', name: 'option-multi', options: [ '1', '2', '3' ], multi: true },
-	{ type: 'reference', name: 'reference', collection: 'projects', multi: false },
-	{ type: 'reference', name: 'reference-multi', collection: 'projects', multi: true },
-	{ type: 'image', name: 'image', fileTypes: [ 'jpg', 'jpeg', 'png', 'svg' ] },
-	{ type: 'attatchment', name: 'attatchment', fileTypes: [ 'pdf' ] }
-];
+const testCollection = {
+	name            : 'Projects',
+	fieldStructures : {
+		name           : { type: 'text', required: true },
+		category       : {
+			type    : 'option',
+			options : [ 'Brand Strategy', 'Branding', 'Website' ],
+			multi   : true
+		},
+		completionDate : { type: 'date', label: 'completion date' },
+		coverImage     : { type: 'file', fileTypes: [ 'image/*' ] },
+		description    : { type: 'text', multiline: 'true' }
+	},
+	items           : [
+		{
+			name           : 'Legion Elite',
+			category       : [ 'Branding' ],
+			completionDate : new Date(),
+			coverImage     : 'https://baldwindesign.co/images/projectThumbnail_legion-elite.jpg',
+			description    : 'Lorem ipsum doler sit amet consectetur'
+		},
+		{
+			name           : 'Kern Realty',
+			category       : [ 'Website' ],
+			completionDate : new Date(),
+			coverImage     : 'https://baldwindesign.co/images/project-thumbnail_kern-realty.jpg',
+			description    : 'Lorem ipsum doler sit amet consectetur'
+		}
+	]
+};
+
+export default testCollection;
