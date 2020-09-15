@@ -1,17 +1,17 @@
 import React, { useContext, useState } from 'react';
 import { authContext } from '../context/auth-context';
 import { summariesContext } from '../context/summaries-context';
-import firebase from '../firebase';
+import { db, DocKey, EditorRole, EditorSummary } from '../firebase';
 import './app-views.css';
 import { Header } from './header/header';
-import { SideBar } from './sidebar/sidebar';
-import { Table } from './table/table';
-import { FormModal } from 'bdc-components';
+import { DataTable, FormModal } from 'bdc-components';
+import { AccountCircleOutlined as EditorIcon } from '@material-ui/icons';
+import { AppView } from './app-view';
 
-interface Editor {
+interface CurrentEditor {
 	name: string;
 	email: string;
-	role: string | null;
+	role: EditorRole | null;
 	uid?: string;
 }
 
@@ -20,63 +20,79 @@ export const Editors: React.FC = () => {
 	const { editors } = useContext(summariesContext);
 
 	const [ searchTerm, setSearchTerm ] = useState('');
-	const [ currentEditor, setCurrentEditor ] = useState<Editor | null>(null);
+	const [ currentEditor, setCurrentEditor ] = useState<CurrentEditor | undefined>();
 
-	const saveEditor = (editor: Editor) => {
-		if (editor.uid) {
-			return firebase.firestore().collection(`sites/${site}/editors`).doc(editor.uid).update(editor);
-		} else {
-			return firebase.firestore().collection(`sites/${site}/editors`).add(editor);
+	const newEditor = {
+		name: '',
+		email: '',
+		role: null
+	};
+
+	const saveEditor = () => {
+		const editor = currentEditor
+			? { ...currentEditor, role: currentEditor.role || 'viewer' }
+			: undefined;
+
+		if (editor && editor.uid) {
+			return db
+				.collection('sites')
+				.doc(site as DocKey)
+				.collection('editors')
+				.doc(editor.uid as DocKey)
+				.update(editor);
+		} else if (editor) {
+			return db.collection('sites').doc(site as DocKey).collection('editors').add(editor);
 		}
 	};
 
+	const included = (editor: EditorSummary) =>
+		editor.name.toLowerCase().includes(searchTerm.toLowerCase())
+
 	return (
-		<section className="app">
-			<SideBar />
-			<div className="container">
-				<Header
-					title="Editors"
-					actionName="editors"
-					action={() => {
-						setCurrentEditor({
-							name: '',
-							email: '',
-							role: null
-						});
+		<AppView>
+			<Header
+				title="Editors"
+				actionName="editors"
+				action={() => setCurrentEditor(newEditor)}
+				search={setSearchTerm}
+			/>
+
+			<DataTable
+				items={editors?.filter(included) || []}
+				fieldMap={{
+					name: { label: 'Name', columnTemplate: 2 },
+					email: { label: 'Email', columnTemplate: 3 },
+					role: { label: 'Role' }
+				}}
+				identifyingField="name"
+				itemIcon={<EditorIcon />}
+				itemClickHandler={() => {}}
+			/>
+
+			{currentEditor ? (
+				<FormModal
+					name={currentEditor.name || 'New Editor'}
+					fieldStructures={{
+						name: { type: 'text', required: true },
+						email: { type: 'text', required: true },
+						role: {
+							type: 'option',
+							options: [ 'viewer', 'editor', 'admin', 'owner' ],
+							required: true
+						}
 					}}
-					search={setSearchTerm}
+					initialValues={{
+						name: currentEditor.name,
+						email: currentEditor.email,
+						role: currentEditor.role
+					}}
+					onSubmit={async values => {
+						await saveEditor();
+						setCurrentEditor(undefined);
+					}}
+					onClose={() => setCurrentEditor(undefined)}
 				/>
-
-				<Table
-					type="editors"
-					fieldMap={[ 'name', 'email', 'role' ]}
-					items={editors}
-					itemClickHandler={setCurrentEditor}
-					included={editor => editor.name.toLowerCase().includes(searchTerm.toLowerCase())}
-				/>
-
-				{currentEditor ? (
-					<FormModal
-						name={currentEditor.name || 'New Editor'}
-						fieldStructures={{
-							name: { type: 'text', required: true },
-							email: { type: 'text', required: true },
-							role: { type: 'option', options: [ 'viewer', 'editor', 'admin', 'owner' ], required: true }
-						}}
-						handleSubmit={async values => {
-							if (currentEditor.uid) await saveEditor({ ...values, uid: currentEditor.uid });
-							if (!currentEditor.uid) await saveEditor(values);
-							setCurrentEditor(null);
-						}}
-						initialValues={{
-							name: currentEditor.name,
-							email: currentEditor.email,
-							role: currentEditor.role!
-						}}
-						handleClose={() => setCurrentEditor(null)}
-					/>
-				) : null}
-			</div>
-		</section>
+			) : null}
+		</AppView>
 	);
 };

@@ -12,12 +12,12 @@ firebase.initializeApp({
 	appId: '1:499203573769:web:fdc4fbbb969942e09c10d8'
 });
 
+export type EditorRole = 'viewer' | 'editor' | 'admin' | 'owner';
+
 export type EditorDoc = {
 	name: string;
-	uid: string;
 	email: string;
-	emailVerified: boolean;
-	role: 'viewer' | 'editor' | 'admin' | 'owner';
+	role: EditorRole;
 };
 
 export type SubmissionDoc = {
@@ -34,10 +34,14 @@ export type SubmissionSummary = {
 	data: SubmissionSummaryData;
 };
 
+export type FieldMap = {
+	[key: string]: { label: string; columnTemplate: number };
+};
+
 export type FormDoc = {
 	name: string;
 	url: string;
-	fields: string[];
+	fields: FieldMap;
 	submissions: SubmissionSummary[];
 };
 
@@ -45,9 +49,12 @@ export type ItemData = {
 	[key: string]: null | string | string[] | firebase.firestore.Timestamp;
 };
 
+export type ItemStatus = 'published' | 'archived';
+
 export type ItemDoc = {
+	name: string;
 	data: ItemData;
-	status: 'published' | 'archived';
+	status: ItemStatus;
 };
 
 export type Field = {
@@ -83,16 +90,22 @@ export type FieldStructure =
 	| DateFieldStructure
 	| FileFieldStructure;
 
+export type FieldStructures = {
+	[key: string]: FieldStructure;
+};
+
 export type ItemSummary = {
-	data: { [key: string]: FieldStructure };
+	id: string;
+	data: ItemData;
 	name: string;
-	status: string;
+	status: ItemStatus;
 	modified: firebase.firestore.Timestamp;
 };
 
 export type CollectionDoc = {
-	fieldStructures: { [key: string]: {} | number };
-	items: { [key: string]: ItemSummary };
+	name: string;
+	fieldStructures: FieldStructures;
+	items: ItemSummary[];
 	url: string;
 };
 
@@ -118,40 +131,43 @@ export type EditorSummary = {
 };
 
 export type SiteDoc = {
+	name: string;
 	collections: CollectionSummary[];
 	forms: FormSummary[];
 	editors: EditorSummary[];
 };
 
-const firestoreInstance = (firebase.firestore() as unknown) as typedFirestore.Firestore<{
+export type DocKey = string & { _docId: never };
+
+export const db = (firebase.firestore() as unknown) as typedFirestore.Firestore<{
 	sites: {
-		key: string & { _siteId: never };
+		key: DocKey;
 		value: SiteDoc;
 		subCollections: {
 			collections: {
-				key: string & { _collectionId: never };
+				key: DocKey;
 				value: CollectionDoc;
 				subCollections: {
 					items: {
-						key: string & { _itemId: never };
+						key: DocKey;
 						value: ItemDoc;
 						subCollections: {};
 					};
 				};
 			};
 			forms: {
-				key: string & { _stringId: never };
+				key: DocKey;
 				value: FormDoc;
 				subCollections: {
 					submissions: {
-						key: string & { _submissionId: never };
+						key: DocKey;
 						value: SubmissionDoc;
 						subCollections: {};
 					};
 				};
 			};
 			editors: {
-				key: string & { _editorId: never };
+				key: DocKey;
 				value: EditorDoc;
 				subCollections: {};
 			};
@@ -159,4 +175,4 @@ const firestoreInstance = (firebase.firestore() as unknown) as typedFirestore.Fi
 	};
 }>;
 
-export default firestoreInstance;
+export default firebase;

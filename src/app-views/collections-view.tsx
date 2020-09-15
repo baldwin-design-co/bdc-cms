@@ -1,37 +1,45 @@
 import React, { useContext, useState } from 'react';
 import { summariesContext } from '../context/summaries-context';
-import { CollectionSummary } from '../types';
+import { DataTable } from 'bdc-components';
+import { CollectionSummary } from '../firebase';
+import { AppView } from './app-view';
 import { Header } from './header/header';
-import { SideBar } from './sidebar/sidebar';
-import { Table } from './table/table';
-
-interface CollectionsViewState {
-	collections?: CollectionSummary[];
-	searchTerm: string;
-}
+import { LayersOutlined as CollectionsIcon } from '@material-ui/icons';
+import { formatDate } from '../format-date';
 
 export const Collections = () => {
 	const { collections } = useContext(summariesContext);
-	const [ state, setState ] = useState<CollectionsViewState>({ collections, searchTerm: '' });
+	const [ searchTerm, setSearchTerm ] = useState('');
 
-	const search = (searchTerm: string) => setState({ ...state, searchTerm });
 	const included = (collection: CollectionSummary) =>
-		collection.name.toLowerCase().includes(state.searchTerm.toLowerCase());
+		collection.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+	const stringifyCollectionData = (collections: CollectionSummary[]) => {
+		const includedCollections = collections.filter(included);
+
+		return includedCollections.map(collection => ({
+			...collection,
+			modified: formatDate(collection.modified),
+			itemCount: collection.itemCount.toString()
+		}));
+	};
 
 	return (
-		<section className="app">
-			<SideBar />
-			<div className="container">
-				<Header title="Collections" search={search} />
+		<AppView>
+			<Header title="Collections" search={setSearchTerm} />
 
-				<Table
-					type="collections"
-					fieldMap={[ 'name', 'url', { items: 'itemCount' }, 'modified' ]}
-					items={collections}
-					itemClickHandler="name"
-					included={included}
-				/>
-			</div>
-		</section>
+			<DataTable
+				items={stringifyCollectionData(collections || [])}
+				fieldMap={{
+					name: { label: 'Name', columnTemplate: 2 },
+					url: { label: 'Url', columnTemplate: 4 },
+					itemCount: { label: 'Items' },
+					modified: { label: 'Modified', columnTemplate: 2 }
+				}}
+				identifyingField="name"
+				itemIcon={<CollectionsIcon />}
+				itemClickHandler={() => {}}
+			/>
+		</AppView>
 	);
 };

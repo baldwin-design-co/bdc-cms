@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SubmissionSummary } from '../../types';
+import { SubmissionSummary } from '../../firebase';
 import { AsyncButton } from './async-button/async-button';
 
 interface SubmissionCardProps {
@@ -37,7 +37,11 @@ export const SubmissionCard: React.FC<SubmissionCardProps> = ({
 				{error || null}
 
 				<div className="card-actions">
-					<AsyncButton name="Delete" action={deleteSubmission} errorAction={setError} />
+					<AsyncButton
+						name="Delete"
+						action={deleteSubmission}
+						errorAction={setError}
+					/>
 				</div>
 			</div>
 		</section>

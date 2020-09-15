@@ -1,118 +1,105 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { authContext } from '../context/auth-context';
-import firebase from '../firebase';
-import { FieldStructure, FieldStructures } from 'bdc-components'
+import { CollectionDoc, db, DocKey, FieldStructures, ItemData, ItemStatus, ItemSummary } from '../firebase';
 import { Header } from './header/header';
-import { SideBar } from './sidebar/sidebar';
-import { Table } from './table/table';
-import { FormModal } from 'bdc-components';
+import { FormModal, FieldStructures as BDCFieldStructures, DataTable } from 'bdc-components';
+import { AppView } from './app-view';
+import { formatDate } from '../format-date';
 
-export type ItemDataValue <T extends FieldStructure = FieldStructure> =
-	T extends { type: 'text' } ? string
-	: T extends { type: 'date', required: true } ? Date
-	: T extends { type: 'date' } ? Date | null
-	: T extends { type: 'option', required: true } ? string | string[]
-	: T extends { type: 'option' } ? string | string[] | null
-	: T extends { type: 'file', required: true } ? string
-	: T extends { type: 'file' } ? string | null
-	: string | string[] | Date | File | null
-
-type g = ItemDataValue
-
-export type ItemData <T extends FieldStructures = FieldStructures> =
-	{ [k in keyof T]: ItemDataValue<T[k]> }
-
-export interface ItemDoc <T extends FieldStructures = FieldStructures> {
-	status: 'published' | 'archived';
-	data: { [k in keyof T]: ItemDataValue<T[k]> };
-}
-
-export interface ItemSummary <T extends FieldStructures = FieldStructures> {
-	name: string;
-	modified: string;
-	status: 'published' | 'archived';
-	data: ItemData<T>;
-	id: string;
+interface CurrentItem {
+	id?: string
+	name?: string
+	data: ItemData
+	status: ItemStatus
+	modified?: firebase.firestore.Timestamp
 }
 
 export const Collection: React.FC<RouteComponentProps<{ page: string }>> = props => {
 	const { site } = useContext(authContext);
 
-	const [ searchTerm, search ] = useState('')
-	const [ currentItem, setCurrentItem ] = useState<ItemData | null>(null)
-	const [ collection, setCollection ] = useState<{
-		name: string,
-		fieldStructures?: FieldStructures,
-		items?: ItemSummary[]
-	}>({
-		name: props.match.params.page,
-		fieldStructures: undefined,
-		items: undefined
-	})
+	const [ searchTerm, setSearchTerm ] = useState('')
+	const [ currentItem, setCurrentItem ] = useState<CurrentItem | undefined>()
+	const [ collection, setCollection ] = useState<CollectionDoc | undefined>()
 
-	useEffect(
-		() => (
-			firebase.firestore().collection(`sites/${site}/collections`).doc(collection.name).onSnapshot(docSnap => {
-				if (docSnap.exists) {
-					const { fieldStructures, items } = docSnap.data()!;
-					setCollection({ ...collection, fieldStructures, items });
-				}
-			})
-		),
-		[ site, collection.name ]
+	useEffect(() => (
+		db.collection('sites')
+			.doc(site as DocKey)
+			.collection('collections')
+			.doc(props.match.params.page as DocKey)
+			.onSnapshot(docSnap => {
+				setCollection(docSnap.data());
+			}
+		)),
+		[ site, props.match.params.page ]
 	);
 
-	const defaultItem = (fieldStructures?: FieldStructures) => {
+	const included = (item: ItemSummary) => 
+		item.name.toLowerCase().includes(searchTerm.toLowerCase())
+
+	const stringifyItemData = (items: ItemSummary[]) => {
+		const includedItems = items.filter(included)
+
+		return includedItems.map(item => ({
+			...item,
+			modified: formatDate(item.modified)
+		}))
+	}
+
+	const defaultItemOf = (fieldStructures: FieldStructures) => {
 		const fields = Object.keys(fieldStructures)
 		const item: ItemData = {}
 
-		const defaultValueOf = (field: FieldStructure): string | string[] | null => {
-			if (field.type === 'text') return '';
-			if (field.type === 'option' && !field.multi) return null;
-			if (field.type === 'option' && field.multi) return [];
-			if (field.type === 'date') return null;
-			if (field.type === 'file') return null;
-			return null;
-		};
-
 		fields.forEach(field => {
-			item[field] = defaultValueOf(fieldStructures[field]);
+			const fieldStructure = fieldStructures[field]
+			let defaultValue: string | string[] | null = null
+
+			if (fieldStructure.type === 'text') defaultValue = '';
+			if (fieldStructure.type === 'option' && !fieldStructure.multi) defaultValue = null;
+			if (fieldStructure.type === 'option' && fieldStructure.multi) defaultValue = [];
+			if (fieldStructure.type === 'date') defaultValue = null;
+			if (fieldStructure.type === 'file') defaultValue = null;
+
+			item[field] = defaultValue
 		})
 
 		return item
 	}
 
 	return (
-		<section className="app">
-			<SideBar />
-			<div className="container">
-				<Header
-					title={collection.name}
-					back="/collections"
-					actionName="collection"
-					action={() => setCurrentItem(defaultItem(collection.fieldStructures))}
-					search={search}
-				/>
-
-				<Table
-					type="collection"
-					fieldMap={[ 'name', 'status', 'modified' ]}
-					items={collection.items}
-					itemClickHandler={setCurrentItem}
-					included={item => item.name.toLowerCase().includes(searchTerm.toLowerCase())}
-				/>
-
-				{currentItem && collection.fieldStructures ? (
-					<FormModal
-						name={currentItem.data.name || 'New Item'}
-						fieldStructures={collection.fieldStructures}
-						handleSubmit={console.log}
-						handleClose={() => setCurrentItem(null)}
+		<AppView>
+			{collection ? 
+				<>
+					<Header
+						title={collection.name}
+						returnLink="/collections"
+						actionName="collection"
+						action={() => {
+							setCurrentItem({
+								data: defaultItemOf(collection.fieldStructures),
+								status: 'published'
+							})
+						}}
+						search={setSearchTerm}
 					/>
-				) : null}
-			</div>
-		</section>
+
+					<DataTable
+						items={stringifyItemData(collection.items)}
+						fieldMap={{ name: { columnTemplate: 3 }, status: { columnTemplate: 1 }, modified: { columnTemplate: 2 } }}
+						identifyingField='name'
+						itemClickHandler={() => {}}
+					/>
+
+					{currentItem ? (
+						<FormModal
+							name={currentItem.name || 'New Item'}
+							fieldStructures={collection.fieldStructures as BDCFieldStructures}
+							onSubmit={console.log}
+							onClose={() => setCurrentItem(undefined)}
+						/>
+					) : null}
+				</>
+			: null}
+		</AppView>
 	);
 };

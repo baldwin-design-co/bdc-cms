@@ -1,3 +1,4 @@
+import { bdcTheme, ThemeProvider } from 'bdc-components';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route } from 'react-router-dom';
@@ -15,16 +16,18 @@ import { PrivateRoute } from './private-route';
 const App = () => (
 	<AuthProvider>
 		<BrowserRouter>
-			<Route path="/sign-in" component={SignIn} />
-			<Route path="/sign-up" component={SignUp} />
-			<SummariesProvider>
-				{/* <PrivateRoute exact path="/dashboard" component={Dashboard} /> */}
-				<PrivateRoute exact path="/collections" component={Collections} />
-				<PrivateRoute exact path="/collections/:page" component={Collection} />
-				<PrivateRoute exact path="/forms" component={Forms} />
-				<PrivateRoute exact path="/forms/:page" component={Form} />
-				<PrivateRoute exact path="/editors" component={Editors} />
-			</SummariesProvider>
+			<ThemeProvider theme={bdcTheme}>
+				<Route path="/sign-in" component={SignIn} />
+				<Route path="/sign-up" component={SignUp} />
+				<SummariesProvider>
+					{/* <PrivateRoute exact path="/dashboard" component={Dashboard} /> */}
+					<PrivateRoute exact path="/collections" component={Collections} />
+					<PrivateRoute exact path="/collections/:page" component={Collection} />
+					<PrivateRoute exact path="/forms" component={Forms} />
+					<PrivateRoute exact path="/forms/:page" component={Form} />
+					<PrivateRoute exact path="/editors" component={Editors} />
+				</SummariesProvider>
+			</ThemeProvider>
 		</BrowserRouter>
 	</AuthProvider>
 );

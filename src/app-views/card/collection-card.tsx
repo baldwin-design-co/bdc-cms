@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { FieldStructure, ItemDoc } from '../../types';
+import { ItemDoc, FieldStructures } from '../../firebase';
 import { AsyncButton } from './async-button/async-button';
 import './card.css';
 
 interface CollectionCardProps {
 	currentItem: ItemDoc;
-	fieldStructures: FieldStructure<any>[];
+	fieldStructures: FieldStructures;
 	setCurrentItem: (item: ItemDoc) => void;
 	closeCurrentItem: () => void;
 	saveCurrentItem: () => void;
@@ -43,7 +43,12 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({
 						action={() => {}}
 						errorAction={setError}
 					/>
-					<AsyncButton name="delete" subAction action={deleteCurrentItem} errorAction={setError} />
+					<AsyncButton
+						name="delete"
+						subAction
+						action={deleteCurrentItem}
+						errorAction={setError}
+					/>
 					<AsyncButton name="save" action={saveCurrentItem} errorAction={setError} />
 				</div>
 			</div>
