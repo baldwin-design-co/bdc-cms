@@ -1,10 +1,10 @@
 import React, { useContext, useState } from 'react';
 import { summariesContext } from '../context/summaries-context';
-import { FormSummary } from '../firebase';
 import { AppView } from './app-view';
 import { Header } from './header/header';
 import { DataTable } from 'bdc-components';
 import { InsertDriveFileOutlined as FormIcon } from '@material-ui/icons';
+import { FormSummary } from '../../firestore';
 
 export const Forms: React.FC = () => {
 	const { forms } = useContext(summariesContext);

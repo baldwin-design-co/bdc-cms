@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SubmissionSummary } from '../../firebase';
+import { SubmissionSummary } from '../../../firestore';
 import { AsyncButton } from './async-button/async-button';
 
 interface SubmissionCardProps {

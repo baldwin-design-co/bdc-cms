@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ItemDoc, FieldStructures } from '../../firebase';
+import { ItemDoc, FieldStructures } from '../../../firestore';
 import { AsyncButton } from './async-button/async-button';
 import './card.css';
 

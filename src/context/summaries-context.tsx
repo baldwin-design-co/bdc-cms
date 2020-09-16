@@ -1,6 +1,7 @@
 import 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { db, CollectionSummary, EditorSummary, FormSummary, DocKey } from '../firebase';
+import { CollectionSummary, FormSummary, EditorSummary, DocKey } from '../../firestore';
+import { db } from '../firebase';
 import { authContext } from './auth-context';
 
 interface SummariesState {

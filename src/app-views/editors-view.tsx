@@ -1,12 +1,13 @@
 import React, { useContext, useState } from 'react';
 import { authContext } from '../context/auth-context';
 import { summariesContext } from '../context/summaries-context';
-import { db, DocKey, EditorRole, EditorSummary } from '../firebase';
+import { db } from '../firebase';
 import './app-views.css';
 import { Header } from './header/header';
 import { DataTable, FormModal } from 'bdc-components';
 import { AccountCircleOutlined as EditorIcon } from '@material-ui/icons';
 import { AppView } from './app-view';
+import { EditorRole, DocKey, EditorSummary } from '../../firestore';
 
 interface CurrentEditor {
 	name: string;

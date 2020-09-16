@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { SubmissionSummary, FormDoc, DocKey } from '../../firestore';
 import { authContext } from '../context/auth-context';
-import { db, DocKey, FormDoc, SubmissionSummary } from '../firebase';
+import { db } from '../firebase';
 import { AppView } from './app-view';
 import { SubmissionCard } from './card/submission-card';
 import { Header } from './header/header';

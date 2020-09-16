@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { authContext } from '../context/auth-context';
-import { CollectionDoc, db, DocKey, FieldStructures, ItemData, ItemStatus, ItemSummary } from '../firebase';
+import { db } from '../firebase';
 import { Header } from './header/header';
 import { FormModal, FieldStructures as BDCFieldStructures, DataTable } from 'bdc-components';
 import { AppView } from './app-view';
 import { formatDate } from '../format-date';
+import { CollectionDoc, DocKey, FieldStructures, ItemData, ItemStatus, ItemSummary } from '../../firestore';
 
 interface CurrentItem {
 	id?: string
