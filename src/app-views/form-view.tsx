@@ -1,3 +1,4 @@
+import { PageHeader } from 'bdc-components';
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { SubmissionSummary, FormDoc, DocKey } from '../../firestore';
@@ -5,7 +6,6 @@ import { authContext } from '../context/auth-context';
 import { db } from '../firebase';
 import { AppView } from './app-view';
 import { SubmissionCard } from './card/submission-card';
-import { Header } from './header/header';
 
 interface Form {
 	name: string;
@@ -33,7 +33,7 @@ export const Form: React.FC<RouteComponentProps<{ page: string }>> = props => {
 		<AppView>
 			{form ? 
 				<>
-					<Header title={form.name} returnLink="/forms" />
+					<PageHeader title={form.name} returnLink="/forms" />
 
 					{/* <DataTable
 						items={form.submissions}

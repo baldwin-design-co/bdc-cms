@@ -1,8 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { summariesContext } from '../context/summaries-context';
 import { AppView } from './app-view';
-import { Header } from './header/header';
-import { DataTable } from 'bdc-components';
+import { DataTable, PageHeader } from 'bdc-components';
 import { InsertDriveFileOutlined as FormIcon } from '@material-ui/icons';
 import { FormSummary } from '../../firestore';
 
@@ -25,7 +24,7 @@ export const Forms: React.FC = () => {
 
 	return (
 		<AppView>
-			<Header title="Forms" search={setSearchterm} />
+			<PageHeader title="Forms" search={setSearchterm} />
 
 			<DataTable
 				fieldMap={{

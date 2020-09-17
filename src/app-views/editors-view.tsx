@@ -3,9 +3,9 @@ import { authContext } from '../context/auth-context';
 import { summariesContext } from '../context/summaries-context';
 import { db } from '../firebase';
 import './app-views.css';
-import { Header } from './header/header';
-import { DataTable, FormModal } from 'bdc-components';
+import { DataTable, FormModal, PageHeader } from 'bdc-components';
 import { AccountCircleOutlined as EditorIcon } from '@material-ui/icons';
+import { PersonAdd as NewEditorIcon } from '@material-ui/icons'
 import { AppView } from './app-view';
 import { EditorRole, DocKey, EditorSummary } from '../../firestore';
 
@@ -22,12 +22,6 @@ export const Editors: React.FC = () => {
 
 	const [ searchTerm, setSearchTerm ] = useState('');
 	const [ currentEditor, setCurrentEditor ] = useState<CurrentEditor | undefined>();
-
-	const newEditor = {
-		name: '',
-		email: '',
-		role: null
-	};
 
 	const saveEditor = () => {
 		const editor = currentEditor
@@ -51,10 +45,10 @@ export const Editors: React.FC = () => {
 
 	return (
 		<AppView>
-			<Header
+			<PageHeader
 				title="Editors"
-				actionName="editors"
-				action={() => setCurrentEditor(newEditor)}
+				action={() => setCurrentEditor({ name: '', email: '', role: null })}
+				actionLabel={<NewEditorIcon />}
 				search={setSearchTerm}
 			/>
 

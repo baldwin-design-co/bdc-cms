@@ -1,17 +1,16 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { DocKey, EditorSummary } from '../../firestore';
-import { db } from './index';
 
 exports.AggregateEditors = functions.firestore
 	.document('sites/{site}/editors/{uid}')
 	.onWrite(async (change, context) => {
 		const { site, uid } = context.params;
-		const siteRef = db.collection('sites').doc(site as DocKey);
+		const siteRef = admin.firestore().collection('sites').doc(site as DocKey);
 
 		if (change.before.exists && change.after.exists) {
 			//update trigger// √
-			return db.runTransaction(async transaction => {
+			return admin.firestore().runTransaction(async transaction => {
 				const siteDoc = await transaction.get(siteRef);
 
 				const { name, email, role, emailVerified } = change.after.data()!;
@@ -53,9 +52,9 @@ exports.AggregateEditors = functions.firestore
 	});
 
 exports.acceptCollaborationInvitation = functions.https.onCall(async (data, context) => {
-	return db.runTransaction(async transaction => {});
+	return admin.firestore().runTransaction(async transaction => {});
 });
 
 exports.declineCollaborationInvite = functions.https.onCall(async (data, context) => {
-	return db.runTransaction(async transaction => {});
+	return admin.firestore().runTransaction(async transaction => {});
 });

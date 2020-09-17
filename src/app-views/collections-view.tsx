@@ -1,18 +1,19 @@
 import React, { useContext, useState } from 'react';
 import { summariesContext } from '../context/summaries-context';
-import { DataTable } from 'bdc-components';
+import { DataTable, PageHeader } from 'bdc-components';
 import { AppView } from './app-view';
-import { Header } from './header/header';
 import { LayersOutlined as CollectionsIcon } from '@material-ui/icons';
 import { formatDate } from '../format-date';
 import { authContext } from '../context/auth-context';
 import { CollectionSummary } from '../../firestore';
+import { useHistory } from 'react-router-dom';
 
 export const Collections = () => {
 	const { site } = useContext(authContext);
-	const { collections } = useContext(summariesContext);
+	const { collections, loaded } = useContext(summariesContext);
 
 	const [ searchTerm, setSearchTerm ] = useState('');
+	const history = useHistory();
 
 	const included = (collection: CollectionSummary) =>
 		collection.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -30,7 +31,7 @@ export const Collections = () => {
 
 	return (
 		<AppView>
-			<Header title="Collections" search={setSearchTerm} />
+			<PageHeader title="Collections" search={setSearchTerm} />
 
 			<DataTable
 				items={stringifyCollectionData(collections || [])}
@@ -40,9 +41,10 @@ export const Collections = () => {
 					itemCount: { label: 'Items' },
 					modified: { label: 'Modified', columnTemplate: 2 }
 				}}
+				loading={!loaded}
 				identifyingField="name"
 				itemIcon={<CollectionsIcon />}
-				itemClickHandler={() => {}}
+				itemClickHandler={collection => history.push(`/collections/${collection.name}`)}
 			/>
 		</AppView>
 	);

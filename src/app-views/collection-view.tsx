@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { authContext } from '../context/auth-context';
 import { db } from '../firebase';
-import { Header } from './header/header';
-import { FormModal, FieldStructures as BDCFieldStructures, DataTable } from 'bdc-components';
+import { FormModal, DataTable, InitialValues, PageHeader } from 'bdc-components';
 import { AppView } from './app-view';
 import { formatDate } from '../format-date';
-import { CollectionDoc, DocKey, FieldStructures, ItemData, ItemStatus, ItemSummary } from '../../firestore';
+import { CollectionDoc, DocKey, FieldStructure, FieldStructures, ItemData, ItemStatus, ItemSummary } from '../../firestore';
+import { NoteAddOutlined as NewItemIcon } from '@material-ui/icons'
 
 interface CurrentItem {
 	id?: string
@@ -19,6 +19,7 @@ interface CurrentItem {
 export const Collection: React.FC<RouteComponentProps<{ page: string }>> = props => {
 	const { site } = useContext(authContext);
 
+	const [ loading, setLoading ] = useState(true)
 	const [ searchTerm, setSearchTerm ] = useState('')
 	const [ currentItem, setCurrentItem ] = useState<CurrentItem | undefined>()
 	const [ collection, setCollection ] = useState<CollectionDoc | undefined>()
@@ -30,6 +31,7 @@ export const Collection: React.FC<RouteComponentProps<{ page: string }>> = props
 			.doc(props.match.params.page as DocKey)
 			.onSnapshot(docSnap => {
 				setCollection(docSnap.data());
+				setLoading(false)
 			}
 		)),
 		[ site, props.match.params.page ]
@@ -47,60 +49,60 @@ export const Collection: React.FC<RouteComponentProps<{ page: string }>> = props
 		}))
 	}
 
-	const defaultItemOf = (fieldStructures: FieldStructures) => {
-		const fields = Object.keys(fieldStructures)
-		const item: ItemData = {}
+	const defaultItem = <T extends FieldStructures>(fieldStructures: T) => {
+		const defaultValue = (field: FieldStructure): string | string[] | null => {
+			if (field.type === 'text') return '';
+			if (field.type === 'option' && !field.multi) return null;
+			if (field.type === 'option' && field.multi) return [];
+			if (field.type === 'date') return null;
+			if (field.type === 'file') return null;
+			return null;
+		};
 
-		fields.forEach(field => {
-			const fieldStructure = fieldStructures[field]
-			let defaultValue: string | string[] | null = null
-
-			if (fieldStructure.type === 'text') defaultValue = '';
-			if (fieldStructure.type === 'option' && !fieldStructure.multi) defaultValue = null;
-			if (fieldStructure.type === 'option' && fieldStructure.multi) defaultValue = [];
-			if (fieldStructure.type === 'date') defaultValue = null;
-			if (fieldStructure.type === 'file') defaultValue = null;
-
-			item[field] = defaultValue
-		})
-
-		return item
-	}
+		const fields = Object.keys(fieldStructures);
+		
+		return fields.reduce((acc: ItemData, field) => {
+			acc[field] = defaultValue(fieldStructures[field])
+			return acc
+		}, {})
+	};
 
 	return (
 		<AppView>
-			{collection ? 
-				<>
-					<Header
-						title={collection.name}
-						returnLink="/collections"
-						actionName="collection"
-						action={() => {
-							setCurrentItem({
-								data: defaultItemOf(collection.fieldStructures),
-								status: 'published'
-							})
-						}}
-						search={setSearchTerm}
-					/>
+			<PageHeader
+				title={collection?.name || props.match.params.page}
+				returnLink="/collections"
+				action={() => {
+					setCurrentItem({
+						data: defaultItem(collection?.fieldStructures || {}),
+						status: 'published'
+					})
+				}}
+				actionLabel={<NewItemIcon />}
+				search={setSearchTerm}
+			/>
 
-					<DataTable
-						items={stringifyItemData(collection.items)}
-						fieldMap={{ name: { columnTemplate: 3 }, status: { columnTemplate: 1 }, modified: { columnTemplate: 2 } }}
-						identifyingField='name'
-						itemClickHandler={() => {}}
-					/>
+			<DataTable
+				items={stringifyItemData(collection?.items || [])}
+				fieldMap={{
+					name: { columnTemplate: 3 },
+					status: { columnTemplate: 1 },
+					modified: { columnTemplate: 2 }
+				}}
+				loading={loading}
+				identifyingField='name'
+				itemClickHandler={v => {}}
+			/>
 
-					{currentItem ? (
-						<FormModal
-							name={currentItem.name || 'New Item'}
-							fieldStructures={collection.fieldStructures as BDCFieldStructures}
-							onSubmit={console.log}
-							onClose={() => setCurrentItem(undefined)}
-						/>
-					) : null}
-				</>
-			: null}
+			{currentItem ? (
+				<FormModal
+					name={currentItem.name || 'New Item'}
+					fieldStructures={collection?.fieldStructures || {}}
+					initialValues={currentItem.data as InitialValues<{}>}
+					onSubmit={console.log}
+					onClose={() => setCurrentItem(undefined)}
+				/>
+			) : null}
 		</AppView>
 	);
 };

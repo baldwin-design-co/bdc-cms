@@ -1,5 +1,4 @@
 export const formatDate = (timeStamp: firebase.firestore.Timestamp) => {
-	console.log(timeStamp, typeof timeStamp);
 	const date = timeStamp.toDate();
 
 	const months = [

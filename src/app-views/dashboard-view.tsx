@@ -1,5 +1,5 @@
 import React from 'react';
-import { Header } from './header/header';
+import { PageHeader } from 'bdc-components';
 import { SideBar } from './sidebar/sidebar';
 
 export const Dashboard = () => {
@@ -7,7 +7,7 @@ export const Dashboard = () => {
 		<section className="app">
 			<SideBar />
 			<div className="container">
-				<Header title="Dashboard" />
+				<PageHeader title="Dashboard" />
 				<div className="dashboard-grid" />
 			</div>
 		</section>

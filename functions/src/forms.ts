@@ -1,15 +1,14 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { SubmissionSummary, FormSummary, DocKey } from '../../firestore';
-import { db } from './index';
-import { formatDate } from './index';
+import { SubmissionSummary, FormSummary, DocKey, SubmissionDoc } from '../../firestore';
 
 exports.AggregateSubmissions = functions.firestore
 	.document('sites/{site}/forms/{form}/submissions/{id}')
 	.onWrite(async (change, context) => {
 		const { site, form, id } = context.params;
-		const siteRef = db.collection('sites').doc(site as DocKey);
-		const formRef = db
+		const siteRef = admin.firestore().collection('sites').doc(site as DocKey);
+		const formRef = admin
+			.firestore()
 			.collection('sites')
 			.doc(site as DocKey)
 			.collection('forms')
@@ -17,32 +16,32 @@ exports.AggregateSubmissions = functions.firestore
 
 		if (change.after.exists && !change.before.exists) {
 			//create trigger// √
-			return db.runTransaction(async transaction => {
+			return admin.firestore().runTransaction(async transaction => {
 				const siteDoc = await transaction.get(siteRef);
 
-				const data = change.after.data()!;
-				const submittedOn = formatDate(change.after.createTime!.toDate());
+				const data: SubmissionDoc = change.after.data()!;
+				const submittedOn = change.after.createTime!;
 				const submissionSummary: SubmissionSummary = { id, submittedOn, data };
 
-				const formsArray: FormSummary[] = siteDoc.data()!.forms;
-				const formIndex = formsArray.findIndex(
+				const formSummaryArray: FormSummary[] = siteDoc.data()!.forms;
+				const formSummaryIndex = formSummaryArray.findIndex(
 					formSummary => formSummary.name === form
 				);
 
-				formsArray[formIndex].submissionCount++;
+				formSummaryArray[formSummaryIndex].submissionCount++;
 
 				transaction.update(formRef, {
 					submissions: admin.firestore.FieldValue.arrayUnion(submissionSummary)
 				});
-				transaction.update(siteRef, { forms: formsArray });
+				transaction.update(siteRef, { forms: formSummaryArray });
 			});
 		} else if (change.before.exists && !change.after.exists) {
 			//delete trigger// √
-			return db.runTransaction(async transaction => {
+			return admin.firestore().runTransaction(async transaction => {
 				const siteDoc = await transaction.get(siteRef);
 
-				const data = change.before.data()!;
-				const submittedOn = formatDate(change.before.createTime!.toDate());
+				const data: SubmissionDoc = change.before.data()!;
+				const submittedOn = change.before.createTime!;
 				const submissionSummary: SubmissionSummary = { id, submittedOn, data };
 
 				const formsArray: FormSummary[] = siteDoc.data()!.forms;
@@ -63,21 +62,20 @@ exports.AggregateSubmissions = functions.firestore
 exports.AggregateFormCreate = functions.firestore
 	.document('sites/{site}/forms/{form}')
 	.onCreate((docSnap, context) => {
-		//checked// √
 		const { site } = context.params;
-		const siteRef = db.collection('sites').doc(site);
+		const siteRef = admin.firestore().collection('sites').doc(site);
 
 		const { name, url, submissions } = docSnap.data()!;
 		const formSummary: FormSummary = { name, url, submissionCount: submissions.length };
+
 		return siteRef.update({ forms: admin.firestore.FieldValue.arrayUnion(formSummary) });
 	});
 
 exports.AggregateFormDelete = functions.firestore
 	.document('sites/{site}/forms/{form}')
 	.onDelete((docSnap, context) => {
-		//checked// √
 		const { site } = context.params;
-		const siteRef = db.collection('sites').doc(site);
+		const siteRef = admin.firestore().collection('sites').doc(site);
 
 		const { name, url, submissions } = docSnap.data()!;
 		const formSummary: FormSummary = { name, url, submissionCount: submissions.length };

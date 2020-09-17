@@ -1,4 +1,4 @@
-import firebase from 'firebase/app';
+import * as firebase from 'firebase/app';
 
 export type EditorRole = 'viewer' | 'editor' | 'admin' | 'owner';
 
@@ -8,33 +8,41 @@ export type EditorDoc = {
 	role: EditorRole;
 };
 
-export type SubmissionDoc = {
-	[key: string]: string;
-};
+export type SubmissionDoc<T extends FieldMap = FieldMap> = { [k in keyof T]: string };
 
-export type SubmissionSummaryData = {
-	[key: string]: string;
-};
+export type SubmissionSummaryData<T extends FieldMap = FieldMap> = { [k in keyof T]: string };
 
-export type SubmissionSummary = {
+export type SubmissionSummary<T extends FieldMap = FieldMap> = {
 	id: string;
 	submittedOn: firebase.firestore.Timestamp;
-	data: SubmissionSummaryData;
+	data: SubmissionSummaryData<T>;
 };
 
 export type FieldMap = {
 	[key: string]: { label: string; columnTemplate: number };
 };
 
-export type FormDoc = {
+export type FormDoc<T extends FieldMap = FieldMap> = {
 	name: string;
 	url: string;
-	fields: FieldMap;
-	submissions: SubmissionSummary[];
+	fields: T;
+	fieldOrder: string[];
+	submissions: SubmissionSummary<T>[];
 };
 
-export type ItemData = {
-	[key: string]: null | string | string[] | firebase.firestore.Timestamp;
+export type ItemDataValue <T extends FieldStructure = FieldStructure> =
+	  T extends TextFieldStructure ? string
+	: T extends DateFieldStructure & { required: true } ? firebase.firestore.Timestamp
+	: T extends DateFieldStructure ? firebase.firestore.Timestamp | null
+	// : T extends OptionFieldStructure & { multi: true } ? string[]
+	: T extends OptionFieldStructure & { required: true } ? string | string[]
+	: T extends OptionFieldStructure ? string | string[] | null
+	: T extends FileFieldStructure & { required: true } ? string
+	: T extends FileFieldStructure ? string | null
+	: string | string[] | firebase.firestore.Timestamp | null
+
+export type ItemData<T extends FieldStructures = FieldStructures> = {
+	[k in keyof T]: ItemDataValue<T[k]>
 };
 
 export type ItemStatus = 'published' | 'archived';
@@ -82,18 +90,19 @@ export type FieldStructures = {
 	[key: string]: FieldStructure;
 };
 
-export type ItemSummary = {
+export type ItemSummary<T extends FieldStructures = FieldStructures> = {
 	id: string;
-	data: ItemData;
+	data: ItemData<T>;
 	name: string;
 	status: ItemStatus;
 	modified: firebase.firestore.Timestamp;
 };
 
-export type CollectionDoc = {
+export type CollectionDoc<T extends FieldStructures = FieldStructures> = {
 	name: string;
-	fieldStructures: FieldStructures;
-	items: ItemSummary[];
+	fieldStructures: T;
+	fieldOrder: string[];
+	items: ItemSummary<T>[];
 	url: string;
 };
 

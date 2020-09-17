@@ -6,7 +6,7 @@
 		"@material-ui/core": "^4.11.0",
 		"@material-ui/icons": "^4.9.1",
 		"@types/react-redux": "^7.1.9",
-		"bdc-components": "^0.3.1",
+		"bdc-components": "^0.3.2",
 		"firebase": "^7.20.0",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
