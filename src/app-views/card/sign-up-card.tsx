@@ -28,9 +28,15 @@ export const SignUpCard = () => {
 			<h2>Sign Up</h2>
 
 			<b>Email</b>
-			<input type="text" onChange={e => setCredentials({ ...credentials, email: e.target.value })} />
+			<input
+				type="text"
+				onChange={e => setCredentials({ ...credentials, email: e.target.value })}
+			/>
 			<b>Choose Password</b>
-			<input type="password" onChange={e => setCredentials({ ...credentials, password: e.target.value })} />
+			<input
+				type="password"
+				onChange={e => setCredentials({ ...credentials, password: e.target.value })}
+			/>
 
 			<button className="card-sign-in-action" onClick={action}>
 				{buttonContent}

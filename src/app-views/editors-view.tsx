@@ -5,7 +5,7 @@ import { db } from '../firebase';
 import './app-views.css';
 import { DataTable, FormModal, PageHeader } from 'bdc-components';
 import { AccountCircleOutlined as EditorIcon } from '@material-ui/icons';
-import { PersonAdd as NewEditorIcon } from '@material-ui/icons'
+import { PersonAdd as NewEditorIcon } from '@material-ui/icons';
 import { AppView } from './app-view';
 import { EditorRole, DocKey, EditorSummary } from '../../firestore';
 
@@ -23,37 +23,49 @@ export const Editors: React.FC = () => {
 	const [ searchTerm, setSearchTerm ] = useState('');
 	const [ currentEditor, setCurrentEditor ] = useState<CurrentEditor | undefined>();
 
-	const saveEditor = () => {
-		const editor = currentEditor
-			? { ...currentEditor, role: currentEditor.role || 'viewer' }
-			: undefined;
-
-		if (editor && editor.uid) {
-			return db
+	const saveEditor = async (editor: { name: string, email: string, role: string }) => {
+		const uid = currentEditor?.uid
+		if (editor && uid) {
+			await db
 				.collection('sites')
 				.doc(site as DocKey)
 				.collection('editors')
-				.doc(editor.uid as DocKey)
+				.doc(uid as DocKey)
 				.update(editor);
-		} else if (editor) {
-			return db.collection('sites').doc(site as DocKey).collection('editors').add(editor);
+			setCurrentEditor(undefined)
+		} else {
+			await db.collection('sites').doc(site as DocKey).collection('editors').add(editor);
+			setCurrentEditor(undefined)
 		}
 	};
 
 	const included = (editor: EditorSummary) =>
-		editor.name.toLowerCase().includes(searchTerm.toLowerCase())
+		editor.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+	const getTableItems = (editors: EditorSummary[]) => {
+		const includedEditors = editors.filter(included);
+
+		return includedEditors.map(editor => ({
+			id: editor.uid,
+			data: {
+				name: editor.name,
+				email: editor.email,
+				role: editor.role
+			}
+		}));
+	};
 
 	return (
 		<AppView>
 			<PageHeader
 				title="Editors"
 				action={() => setCurrentEditor({ name: '', email: '', role: null })}
-				actionLabel={<NewEditorIcon />}
+				actionLabel={<NewEditorIcon fontSize="small" />}
 				search={setSearchTerm}
 			/>
 
 			<DataTable
-				items={editors?.filter(included) || []}
+				items={getTableItems(editors || [])}
 				fieldMap={{
 					name: { label: 'Name', columnTemplate: 2 },
 					email: { label: 'Email', columnTemplate: 3 },
@@ -61,7 +73,12 @@ export const Editors: React.FC = () => {
 				}}
 				identifyingField="name"
 				itemIcon={<EditorIcon />}
-				itemClickHandler={() => {}}
+				itemClickHandler={editor => {
+					setCurrentEditor({
+						...editor.data,
+						uid: editor.id
+					});
+				}}
 			/>
 
 			{currentEditor ? (
@@ -81,10 +98,7 @@ export const Editors: React.FC = () => {
 						email: currentEditor.email,
 						role: currentEditor.role
 					}}
-					onSubmit={async values => {
-						await saveEditor();
-						setCurrentEditor(undefined);
-					}}
+					actions={[ { label: 'Submit', validate: true, action: saveEditor }]}
 					onClose={() => setCurrentEditor(undefined)}
 				/>
 			) : null}

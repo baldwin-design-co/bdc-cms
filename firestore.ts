@@ -1,6 +1,6 @@
 import * as firebase from 'firebase/app';
 
-export type EditorRole = 'viewer' | 'editor' | 'admin' | 'owner';
+export type EditorRole = string //'viewer' | 'editor' | 'admin' | 'owner';
 
 export type EditorDoc = {
 	name: string;
@@ -122,7 +122,7 @@ export type FormSummary = {
 export type EditorSummary = {
 	name: string;
 	email: string;
-	role: string;
+	role: EditorRole;
 	uid: string;
 	emailVerified: boolean;
 };

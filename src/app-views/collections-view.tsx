@@ -18,14 +18,17 @@ export const Collections = () => {
 	const included = (collection: CollectionSummary) =>
 		collection.name.toLowerCase().includes(searchTerm.toLowerCase());
 
-	const stringifyCollectionData = (collections: CollectionSummary[]) => {
+	const getTableItems = (collections: CollectionSummary[]) => {
 		const includedCollections = collections.filter(included);
 
 		return includedCollections.map(collection => ({
-			...collection,
-			modified: formatDate(collection.modified),
-			itemCount: collection.itemCount.toString(),
-			url: site + collection.url
+			id: collection.name,
+			data: {
+				name: collection.name,
+				url: site + collection.url,
+				itemCount: collection.itemCount.toString(),
+				modified: formatDate(collection.modified)
+			}
 		}));
 	};
 
@@ -34,7 +37,7 @@ export const Collections = () => {
 			<PageHeader title="Collections" search={setSearchTerm} />
 
 			<DataTable
-				items={stringifyCollectionData(collections || [])}
+				items={getTableItems(collections || [])}
 				fieldMap={{
 					name: { label: 'Name', columnTemplate: 2 },
 					url: { label: 'Url', columnTemplate: 4 },
@@ -44,7 +47,7 @@ export const Collections = () => {
 				loading={!loaded}
 				identifyingField="name"
 				itemIcon={<CollectionsIcon />}
-				itemClickHandler={collection => history.push(`/collections/${collection.name}`)}
+				itemClickHandler={collection => history.push(`/collections/${collection.id}`)}
 			/>
 		</AppView>
 	);

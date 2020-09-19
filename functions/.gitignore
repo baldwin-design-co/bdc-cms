@@ -1,9 +1,5 @@
-# Compiled JavaScript files
-**/*.js
-**/*.js.map
-
-# TypeScript v1 declaration files
-typings/
-
-# Node.js dependency directory
-node_modules/
+**/node_modules/**
+**/build/**
+**/lib/**
+.DS_Store
+.DS_Store?

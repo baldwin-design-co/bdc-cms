@@ -1,0 +1,47 @@
+{
+	"items": [
+		{
+			"data": {
+				"scope": [ "brand strategy", "website" ],
+				"name": "Kern Realty"
+			},
+			"id": "XcMK0lBy1bAlywjmHY4z",
+			"name": "Kern Realty",
+			"status": "published",
+			"modified": {
+				"seconds": 1600207380,
+				"nanoseconds": 0
+			}
+		},
+		{
+			"data": {
+				"scope": [ "brand strategy", "identity design" ],
+				"name": "Scottsdale Hydrotherapy"
+			},
+			"id": "E9yR2Qokdqwo95VSTApN",
+			"name": "Scottsdale Hydrotherapy",
+			"status": "archived",
+			"modified": {
+				"seconds": 1600322921,
+				"nanoseconds": 49567000
+			}
+		}
+	],
+
+	"stringified items": [
+		{
+			"data": {
+				"scope": [ "brand strategy", "website" ],
+				"name": "Kern Realty"
+			},
+			"id": "XcMK0lBy1bAlywjmHY4z"
+		},
+		{
+			"data": {
+				"scope": [ "brand strategy", "identity design" ],
+				"name": "Scottsdale Hydrotherapy"
+			},
+			"id": "E9yR2Qokdqwo95VSTApN"
+		}
+	]
+}

@@ -13,10 +13,7 @@ export const BugReport: React.FC<BugReportProps> = ({ close }) => (
 			description: { type: 'text', multiline: true, required: true },
 			recreation: { type: 'text', multiline: true, required: true }
 		}}
+		actions={[ { label: 'submit', validate: true, action: console.log } ]}
 		onClose={close}
-		onSubmit={values => {
-			console.log(values);
-			close();
-		}}
 	/>
 );

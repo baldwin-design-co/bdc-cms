@@ -40,12 +40,16 @@ export const Collection: React.FC<RouteComponentProps<{ page: string }>> = props
 	const included = (item: ItemSummary) => 
 		item.name.toLowerCase().includes(searchTerm.toLowerCase())
 
-	const stringifyItemData = (items: ItemSummary[]) => {
+	const getTableItems = (items: ItemSummary[]) => {
 		const includedItems = items.filter(included)
 
 		return includedItems.map(item => ({
-			...item,
-			modified: formatDate(item.modified)
+			data: {
+				name: item.name,
+				status: item.status,
+				modified: formatDate(item.modified)
+			},
+			id: item.id
 		}))
 	}
 
@@ -78,12 +82,12 @@ export const Collection: React.FC<RouteComponentProps<{ page: string }>> = props
 						status: 'published'
 					})
 				}}
-				actionLabel={<NewItemIcon />}
+				actionLabel={<NewItemIcon fontSize='small' />}
 				search={setSearchTerm}
 			/>
 
 			<DataTable
-				items={stringifyItemData(collection?.items || [])}
+				items={getTableItems(collection?.items || [])}
 				fieldMap={{
 					name: { columnTemplate: 3 },
 					status: { columnTemplate: 1 },
@@ -91,16 +95,21 @@ export const Collection: React.FC<RouteComponentProps<{ page: string }>> = props
 				}}
 				loading={loading}
 				identifyingField='name'
-				itemClickHandler={v => {}}
+				itemClickHandler={tableItem => {
+					const items = collection?.items || []
+					const item = items.find(item => item.id === tableItem.id)
+					setCurrentItem(item)
+				}}
 			/>
 
 			{currentItem ? (
 				<FormModal
 					name={currentItem.name || 'New Item'}
 					fieldStructures={collection?.fieldStructures || {}}
+					fieldOrder={collection?.fieldOrder}
 					initialValues={currentItem.data as InitialValues<{}>}
-					onSubmit={console.log}
 					onClose={() => setCurrentItem(undefined)}
+					actions={[ { label: 'Submit', validate: true, action: console.log } ]}
 				/>
 			) : null}
 		</AppView>

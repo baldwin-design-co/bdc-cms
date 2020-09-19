@@ -13,12 +13,15 @@ export const Forms: React.FC = () => {
 	const included = (form: FormSummary) =>
 		form.name.toLowerCase().includes(searchTerm.toLowerCase());
 
-	const stringifyFormData = (forms: FormSummary[]) => {
+	const getTableItems = (forms: FormSummary[]) => {
 		const includedForms = forms.filter(included);
 
 		return includedForms.map(form => ({
-			...form,
-			submissionCount: form.submissionCount.toString()
+			id: form.name,
+			data: {
+				...form,
+				submissionCount: form.submissionCount.toString()
+			}
 		}));
 	};
 
@@ -32,7 +35,7 @@ export const Forms: React.FC = () => {
 					url: { columnTemplate: 3 },
 					submissionCount: { label: 'Submissions' }
 				}}
-				items={stringifyFormData(forms || [])}
+				items={getTableItems(forms || [])}
 				itemClickHandler={() => {}}
 				itemIcon={<FormIcon />}
 				identifyingField="name"
