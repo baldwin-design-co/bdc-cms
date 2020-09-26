@@ -111,3 +111,7 @@ p {
 	grid-template-rows: repeat(2, 1fr);
 	gap: 24px;
 }
+
+.MuiSnackbar-root {
+	margin-left: 100px;
+}

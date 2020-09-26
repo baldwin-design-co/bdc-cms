@@ -2,11 +2,15 @@ import React, { useContext, useState } from 'react';
 import { summariesContext } from '../context/summaries-context';
 import { AppView } from './app-view';
 import { DataTable, PageHeader } from 'bdc-components';
-import { InsertDriveFileOutlined as FormIcon } from '@material-ui/icons';
+import { LibraryBooksOutlined as FormIcon } from '@material-ui/icons';
 import { FormSummary } from '../../firestore';
+import { authContext } from '../context/auth-context';
+import { useHistory } from 'react-router-dom';
 
 export const Forms: React.FC = () => {
-	const { forms } = useContext(summariesContext);
+	const { site } = useContext(authContext);
+	const { forms, loaded } = useContext(summariesContext);
+	const history = useHistory();
 
 	const [ searchTerm, setSearchterm ] = useState('');
 
@@ -19,7 +23,8 @@ export const Forms: React.FC = () => {
 		return includedForms.map(form => ({
 			id: form.name,
 			data: {
-				...form,
+				name: form.name,
+				url: site + form.url,
 				submissionCount: form.submissionCount.toString()
 			}
 		}));
@@ -36,8 +41,9 @@ export const Forms: React.FC = () => {
 					submissionCount: { label: 'Submissions' }
 				}}
 				items={getTableItems(forms || [])}
-				itemClickHandler={() => {}}
+				itemClickHandler={form => history.push(`forms/${form.id}`)}
 				itemIcon={<FormIcon />}
+				loading={!loaded}
 				identifyingField="name"
 			/>
 		</AppView>

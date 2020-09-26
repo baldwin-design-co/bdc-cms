@@ -4,11 +4,10 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter, Route } from 'react-router-dom';
 import { Collection } from './app-views/collection-view';
 import { Collections } from './app-views/collections-view';
-import { Editors } from './app-views/editors-view';
 import { Form } from './app-views/form-view';
 import { Forms } from './app-views/forms-view';
-import { SignIn } from './app-views/sign-in-view';
-import { SignUp } from './app-views/sign-up-view';
+import { SignIn } from './auth-views/sign-in-view';
+import { SignUp } from './auth-views/sign-up-view';
 import { AuthProvider } from './context/auth-context';
 import { SummariesProvider } from './context/summaries-context';
 import { PrivateRoute } from './private-route';
@@ -25,7 +24,7 @@ const App = () => (
 					<PrivateRoute exact path="/collections/:page" component={Collection} />
 					<PrivateRoute exact path="/forms" component={Forms} />
 					<PrivateRoute exact path="/forms/:page" component={Form} />
-					<PrivateRoute exact path="/editors" component={Editors} />
+					{/* <PrivateRoute exact path="/editors" component={Editors} /> */}
 				</SummariesProvider>
 			</ThemeProvider>
 		</BrowserRouter>

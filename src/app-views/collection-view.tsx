@@ -75,7 +75,6 @@ export const Collection: React.FC<RouteComponentProps<{ page: string }>> = props
 		<AppView>
 			<PageHeader
 				title={collection?.name || props.match.params.page}
-				returnLink="/collections"
 				action={() => {
 					setCurrentItem({
 						data: defaultItem(collection?.fieldStructures || {}),

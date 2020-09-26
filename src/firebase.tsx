@@ -1,6 +1,8 @@
-import firebase from 'firebase/app';
-import 'firebase/firestore';
+import * as firebase from 'firebase/app';
 import * as typedFirestore from 'typed-firestore';
+import 'firebase/firestore';
+import 'firebase/auth';
+
 import {
 	CollectionDoc,
 	DocKey,

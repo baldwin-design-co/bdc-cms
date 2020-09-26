@@ -1,71 +1,147 @@
+import { AccountCircleOutlined as EditorIcon, DeleteOutline as DeleteIcon, PersonAdd as NewEditorIcon } from '@material-ui/icons';
+import { DataTable, FormModal, PageHeader } from 'bdc-components';
 import React, { useContext, useState } from 'react';
+import { DocumentReference } from 'typed-firestore';
+import { DocKey, EditorDoc, EditorRole } from '../../firestore';
 import { authContext } from '../context/auth-context';
 import { summariesContext } from '../context/summaries-context';
 import { db } from '../firebase';
-import './app-views.css';
-import { DataTable, FormModal, PageHeader } from 'bdc-components';
-import { AccountCircleOutlined as EditorIcon } from '@material-ui/icons';
-import { PersonAdd as NewEditorIcon } from '@material-ui/icons';
 import { AppView } from './app-view';
-import { EditorRole, DocKey, EditorSummary } from '../../firestore';
-
-interface CurrentEditor {
-	name: string;
-	email: string;
-	role: EditorRole | null;
-	uid?: string;
-}
+import 'firebase/firestore'
+import './app-views.css';
 
 export const Editors: React.FC = () => {
 	const { site } = useContext(authContext);
-	const { editors } = useContext(summariesContext);
+	const { editors: editorData, loaded } = useContext(summariesContext);
 
 	const [ searchTerm, setSearchTerm ] = useState('');
-	const [ currentEditor, setCurrentEditor ] = useState<CurrentEditor | undefined>();
+	const [ currentEditor, setCurrentEditor ] = useState<Editor | NewEditor | undefined>();
 
-	const saveEditor = async (editor: { name: string, email: string, role: string }) => {
-		const uid = currentEditor?.uid
-		if (editor && uid) {
+	class Editor {
+		name: string
+		email: string
+		role: EditorRole
+		readonly uid: string
+		docRef: DocumentReference<{ key: DocKey, value: EditorDoc, subCollections: {} }>
+
+		constructor (data: { name: string, email: string, role: EditorRole, uid: string }) {
+			this.name = data.name
+			this.email = data.email
+			this.role = data.role
+			this.uid = data.uid
+			this.docRef = db
+				.collection('sites')
+				.doc(site as DocKey)
+				.collection('editors')
+				.doc(data.uid as DocKey)
+		}
+
+		save = async (data: { name: string, email: string, role: string }) => {
+			const { name, email, role } = data
+
+			this.name = name
+			this.email = email
+			this.role = role
+
+			await this.docRef.update({ name, email, role });
+			setCurrentEditor(undefined)
+		}
+
+		delete = async () => {
+			await this.docRef.delete()
+			setCurrentEditor(undefined)
+		}
+
+		FormModal = () => (
+			<FormModal
+				name={this.name}
+				fieldStructures={{
+					name: { type: 'text', label: 'Name', required: true },
+					email: { type: 'text', label: 'Email', required: true },
+					role: {
+						type: 'option',
+						label: 'Role',
+						options: ['viewer', 'editor', 'admin', 'owner'],
+						required: true
+					}
+				}}
+				initialValues={{
+					name: this.name,
+					email: this.email,
+					role: this.role
+				}}
+				actions={[
+					{ label: <DeleteIcon fontSize="small" />, action: this.delete },
+					{ label: 'Save', validate: true, action: this.save }
+				]}
+				onClose={() => setCurrentEditor(undefined)}
+			/>
+		)
+	}
+
+	class NewEditor {
+		name: string = ''
+		email: string = ''
+		role: EditorRole | null = null
+
+		save = async (data: { name: string, email: string, role: string }) => {
+			const { name, email, role } = data
+
+			this.name = name
+			this.email = email
+			this.role = role
+
 			await db
 				.collection('sites')
 				.doc(site as DocKey)
 				.collection('editors')
-				.doc(uid as DocKey)
-				.update(editor);
-			setCurrentEditor(undefined)
-		} else {
-			await db.collection('sites').doc(site as DocKey).collection('editors').add(editor);
+				.add({ name, email, role })
+
 			setCurrentEditor(undefined)
 		}
-	};
 
-	const included = (editor: EditorSummary) =>
-		editor.name.toLowerCase().includes(searchTerm.toLowerCase());
+		FormModal = () => (
+			<FormModal
+				name='New Editor'
+				fieldStructures={{
+					name: { type: 'text', label: 'Name', required: true },
+					email: { type: 'text', label: 'Email', required: true },
+					role: {
+						type: 'option',
+						label: 'Role',
+						options: ['viewer', 'editor', 'admin', 'owner'],
+						required: true
+					}
+				}}
+				actions={[ { label: 'Save', validate: true, action: this.save } ]}
+				onClose={() => setCurrentEditor(undefined)}
+			/>
+		)
+	}
 
-	const getTableItems = (editors: EditorSummary[]) => {
-		const includedEditors = editors.filter(included);
+	const editors = editorData?.map(editor => new Editor(editor)) || []
+	const visibleEditors = editors.filter(editor => editor.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-		return includedEditors.map(editor => ({
-			id: editor.uid,
-			data: {
-				name: editor.name,
-				email: editor.email,
-				role: editor.role
-			}
-		}));
-	};
+	const tableItems = visibleEditors.map(editor => ({
+		id: editor.uid,
+		data: {
+			name: editor.name,
+			email: editor.email,
+			role: editor.role
+		}
+	}))
 
 	return (
 		<AppView>
 			<PageHeader
 				title="Editors"
-				action={() => setCurrentEditor({ name: '', email: '', role: null })}
+				action={() => { setCurrentEditor(new NewEditor())}}
 				actionLabel={<NewEditorIcon fontSize="small" />}
 				search={setSearchTerm}
 			/>
 
 			<DataTable
-				items={getTableItems(editors || [])}
+				items={tableItems}
 				fieldMap={{
 					name: { label: 'Name', columnTemplate: 2 },
 					email: { label: 'Email', columnTemplate: 3 },
@@ -73,35 +149,14 @@ export const Editors: React.FC = () => {
 				}}
 				identifyingField="name"
 				itemIcon={<EditorIcon />}
-				itemClickHandler={editor => {
-					setCurrentEditor({
-						...editor.data,
-						uid: editor.id
-					});
+				loading={!loaded}
+				itemClickHandler={item => {
+					const editor = editors.find(editor => (editor.uid === item.id))
+					setCurrentEditor(editor)
 				}}
 			/>
 
-			{currentEditor ? (
-				<FormModal
-					name={currentEditor.name || 'New Editor'}
-					fieldStructures={{
-						name: { type: 'text', required: true },
-						email: { type: 'text', required: true },
-						role: {
-							type: 'option',
-							options: [ 'viewer', 'editor', 'admin', 'owner' ],
-							required: true
-						}
-					}}
-					initialValues={{
-						name: currentEditor.name,
-						email: currentEditor.email,
-						role: currentEditor.role
-					}}
-					actions={[ { label: 'Submit', validate: true, action: saveEditor }]}
-					onClose={() => setCurrentEditor(undefined)}
-				/>
-			) : null}
+			{currentEditor && <currentEditor.FormModal />}
 		</AppView>
 	);
 };

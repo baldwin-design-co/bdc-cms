@@ -31,7 +31,6 @@ export const AuthProvider: React.FC<{}> = props => {
 				const { role, site } = (await user.getIdTokenResult()).claims;
 				const roleIndex = [ 'viewer', 'editor', 'admin', 'owner' ].indexOf(role);
 				setAuthState({ ...authState, user, roleIndex, site });
-				console.log(role, user.email);
 			} else {
 				setAuthState({ ...authState, user, roleIndex: 0, site: undefined });
 			}
@@ -52,6 +51,8 @@ export const AuthProvider: React.FC<{}> = props => {
 	const signOut = () => firebase.auth().signOut();
 
 	return (
-		<authContext.Provider value={{ ...authState, signIn, signUp, signOut }}>{props.children}</authContext.Provider>
+		<authContext.Provider value={{ ...authState, signIn, signUp, signOut }}>
+			{props.children}
+		</authContext.Provider>
 	);
 };

@@ -11,55 +11,18 @@
 	flex-direction: column;
 	align-items: center;
 	padding: 20px 0;
-	background-image: url(./icons/Logo.svg);
-	background-repeat: no-repeat;
-	background-position: 50% calc(100% - 20px);
-	background-size: 50px;
 }
 
 .navlink {
 	width: 48px;
 	height: 48px;
 	margin: 20px;
-	background-position: 50% 50%;
-	background-size: 36px;
-	background-repeat: no-repeat;
-	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #000;
 }
 
-.navlink.dashboard.active {
-	filter: invert(36%) sepia(87%) saturate(562%) hue-rotate(187deg) brightness(92%) contrast(80%);
-}
-.navlink.dashboard {
-	background-image: url(./icons/analytics.svg);
-}
-.navlink.collections.active {
-	filter: invert(36%) sepia(87%) saturate(562%) hue-rotate(187deg) brightness(92%) contrast(80%);
-}
-.navlink.collections {
-	background-image: url(./icons/collections.svg);
-}
-.navlink.forms.active {
-	filter: invert(36%) sepia(87%) saturate(562%) hue-rotate(187deg) brightness(92%) contrast(80%);
-}
-.navlink.forms {
-	background-image: url(./icons/forms.svg);
-}
-.navlink.editors.active {
-	filter: invert(36%) sepia(87%) saturate(562%) hue-rotate(187deg) brightness(92%) contrast(80%);
-}
-.navlink.editors {
-	background-image: url(./icons/editors.svg);
-}
-
-.help {
-	width: 36px;
-	height: 36px;
-	margin-top: auto;
-	background-image: url(./icons/help.svg);
-	background-position: center;
-	background-size: 24px;
-	background-repeat: no-repeat;
-	position: absolute;
-	bottom: 60px;
+.navlink.active {
+	color: var(--primary);
 }

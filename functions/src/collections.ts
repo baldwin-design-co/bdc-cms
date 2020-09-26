@@ -1,18 +1,16 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { ItemSummary, CollectionSummary, DocKey } from '../../firestore';
+import { ItemSummary, CollectionSummary } from '../../firestore';
 
 exports.AggregateItems = functions.firestore
 	.document('sites/{site}/collections/{collectionName}/items/{id}')
 	.onWrite(async (change, context) => {
 		const { site, collectionName, id } = context.params;
-		const siteRef = admin.firestore().collection('sites').doc(site as DocKey);
+		const siteRef = admin.firestore().collection('sites').doc(site);
 		const collectionRef = admin
 			.firestore()
-			.collection('sites')
-			.doc(site as DocKey)
-			.collection('collections')
-			.doc(collectionName as DocKey);
+			.collection(`sites/${site}/collections`)
+			.doc(collectionName);
 
 		if (change.before.exists && change.after.exists) {
 			//update trigger// √
@@ -22,18 +20,12 @@ exports.AggregateItems = functions.firestore
 					transaction.get(siteRef)
 				]);
 
-				const { status, data } = change.after.data()!;
+				const { name, status, data } = change.after.data()!;
 				const modified = change.after.updateTime!;
 
 				const itemsArray: ItemSummary[] = collectionDoc.data()!.items;
 				const itemIndex = itemsArray.findIndex(itemSummary => itemSummary.id === id);
-				const itemSummary: ItemSummary = {
-					name: data.name,
-					id,
-					status,
-					modified,
-					data
-				};
+				const itemSummary: ItemSummary = { name, id, status, modified, data };
 
 				const collectionsArray: CollectionSummary[] = siteDoc.data()!.collections;
 				const collectionIndex = collectionsArray.findIndex(
@@ -54,15 +46,9 @@ exports.AggregateItems = functions.firestore
 			return admin.firestore().runTransaction(async transaction => {
 				const siteDoc = await transaction.get(siteRef);
 
-				const { status, data } = change.after.data()!;
+				const { name, status, data } = change.after.data()!;
 				const modified = change.after.createTime!;
-				const itemSummary: ItemSummary = {
-					name: data.name,
-					id,
-					status,
-					modified,
-					data
-				};
+				const itemSummary: ItemSummary = { name, id, status, modified, data };
 
 				const collectionsArray: CollectionSummary[] = siteDoc.data()!.collections;
 				const collectionIndex = collectionsArray.findIndex(
@@ -86,15 +72,9 @@ exports.AggregateItems = functions.firestore
 			return admin.firestore().runTransaction(async transaction => {
 				const siteDoc = await transaction.get(siteRef);
 
-				const { status, data } = change.before.data()!;
+				const { name, status, data } = change.before.data()!;
 				const modified = change.before.updateTime!;
-				const itemSummary: ItemSummary = {
-					name: data.name,
-					id,
-					status,
-					modified,
-					data
-				};
+				const itemSummary: ItemSummary = { name, id, status, modified, data };
 
 				const collectionsArray: CollectionSummary[] = siteDoc.data()!.collections;
 				const collectionIndex = collectionsArray.findIndex(
