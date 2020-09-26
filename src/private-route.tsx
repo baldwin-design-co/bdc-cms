@@ -2,17 +2,20 @@ import React, { useContext } from 'react';
 import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
 import { authContext } from './context/auth-context';
 
-export const PrivateRoute: React.FC<{
+interface PrivateRouteProps {
 	component: React.FC<RouteComponentProps<{ page: string }>>;
 	path: string;
 	exact?: boolean;
-}> = props => {
+}
+
+export const PrivateRoute: React.FC<PrivateRouteProps> = ({ component, path, exact }) => {
 	const { user } = useContext(authContext);
+
 	const redirect = () => <Redirect to="/sign-in" />;
 
 	return user ? (
-		<Route path={props.path} exact={!!props.exact} component={props.component} />
+		<Route path={path} exact={!!exact} component={component} />
 	) : (
-		<Route path={props.path} exact={!!props.exact} component={redirect} />
+		<Route path={path} exact={!!exact} component={redirect} />
 	);
 };

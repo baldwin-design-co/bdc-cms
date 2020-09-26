@@ -14,8 +14,6 @@ export const SideBar = () => {
 
 	return (
 		<nav className="side-bar">
-			{/* <NavLink className="navlink dashboard" exact to="/dashboard" /> */}
-
 			<Tooltip
 				title="Collections"
 				placement="right"
@@ -40,7 +38,6 @@ export const SideBar = () => {
 				</NavLink>
 			</Tooltip>
 
-			{/* <NavLink className="navlink editors" to="/editors" /> */}
 			<IconButton
 				onClick={() => setHelpVisibility(!helpVisible)}
 				style={{ position: 'absolute', bottom: 20, color: '#000' }}

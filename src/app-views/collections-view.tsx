@@ -3,7 +3,7 @@ import { summariesContext } from '../context/summaries-context';
 import { DataTable, PageHeader } from 'bdc-components';
 import { AppView } from './app-view';
 import { LayersOutlined as CollectionsIcon } from '@material-ui/icons';
-import { formatDate } from '../format-date';
+import { formatDate } from './format-date';
 import { authContext } from '../context/auth-context';
 import { CollectionSummary } from '../../firestore';
 import { useHistory } from 'react-router-dom';
