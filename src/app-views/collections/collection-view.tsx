@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { authContext } from '../context/auth-context';
-import { db } from '../firebase';
+import { authContext } from '../../context/auth-context';
+import { db } from '../../firebase';
 import { FormModal, DataTable, InitialValues, PageHeader } from 'bdc-components';
-import { AppView } from './app-view';
+import { AppView } from '../app-view';
 import { formatDate } from './format-date';
-import { CollectionDoc, DocKey, FieldStructure, FieldStructures, ItemData, ItemStatus, ItemSummary } from '../../firestore';
+import { CollectionDoc, DocKey, FieldStructure, FieldStructures, ItemData, ItemStatus, ItemSummary } from '../../../firestore';
 import { NoteAddOutlined as NewItemIcon } from '@material-ui/icons'
 
 interface CurrentItem {

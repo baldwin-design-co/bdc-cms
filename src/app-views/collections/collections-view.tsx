@@ -1,13 +1,12 @@
 import React, { useContext, useState } from 'react';
-import { summariesContext } from '../context/summaries-context';
+import { summariesContext } from '../../context/summaries-context';
 import { DataTable, PageHeader } from 'bdc-components';
-import { AppView } from './app-view';
+import { AppView } from '../app-view';
 import { LayersOutlined as CollectionsIcon } from '@material-ui/icons';
 import { formatDate } from './format-date';
-import { authContext } from '../context/auth-context';
-import { CollectionSummary } from '../../firestore';
+import { authContext } from '../../context/auth-context';
+import { CollectionSummary } from '../../../firestore';
 import { useHistory } from 'react-router-dom';
-import './app-views.css';
 
 export const Collections = () => {
 	const { site } = useContext(authContext);

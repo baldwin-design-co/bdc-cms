@@ -1,10 +1,10 @@
 import React, { useContext, useState } from 'react';
-import { summariesContext } from '../context/summaries-context';
-import { AppView } from './app-view';
+import { summariesContext } from '../../context/summaries-context';
+import { AppView } from '../app-view';
 import { DataTable, PageHeader } from 'bdc-components';
 import { LibraryBooksOutlined as FormIcon } from '@material-ui/icons';
-import { FormSummary } from '../../firestore';
-import { authContext } from '../context/auth-context';
+import { FormSummary } from '../../../firestore';
+import { authContext } from '../../context/auth-context';
 import { useHistory } from 'react-router-dom';
 
 export const Forms: React.FC = () => {
