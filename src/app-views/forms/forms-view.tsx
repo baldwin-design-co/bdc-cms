@@ -7,7 +7,7 @@ import { FormSummary } from '../../../firestore';
 import { authContext } from '../../context/auth-context';
 import { useHistory } from 'react-router-dom';
 
-export const Forms: React.FC = () => {
+export const FormsView: React.FC = () => {
 	const { site } = useContext(authContext);
 	const { forms, loaded } = useContext(summariesContext);
 	const history = useHistory();

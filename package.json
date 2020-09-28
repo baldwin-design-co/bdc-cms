@@ -5,14 +5,12 @@
 	"dependencies": {
 		"@material-ui/core": "^4.11.0",
 		"@material-ui/icons": "^4.9.1",
-		"@types/react-redux": "^7.1.9",
 		"bdc-components": "^0.4.0",
 		"firebase": "^7.20.0",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
 		"react-router-dom": "^5.2.0",
-		"react-scripts": "^3.4.3",
-		"typed-admin-firestore": "^1.1.1"
+		"react-scripts": "^3.4.3"
 	},
 	"scripts": {
 		"start": "react-scripts start",
@@ -40,7 +38,6 @@
 		"@types/react": "^16.9.49",
 		"@types/react-dom": "^16.9.8",
 		"@types/react-router-dom": "^5.1.5",
-		"typed-firestore": "^1.0.6",
 		"typescript": "^3.9.7"
 	}
 }

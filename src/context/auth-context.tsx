@@ -1,5 +1,3 @@
-import 'firebase/auth';
-import 'firebase/functions';
 import React, { createContext, useEffect, useState } from 'react';
 import firebase from '../firebase';
 

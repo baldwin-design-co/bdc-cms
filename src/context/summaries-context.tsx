@@ -1,8 +1,7 @@
-import 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { CollectionSummary, FormSummary, EditorSummary, DocKey } from '../../firestore';
-import { db } from '../firebase';
+import { CollectionSummary, FormSummary, EditorSummary } from '../../firestore';
 import { authContext } from './auth-context';
+import firebase from '../firebase';
 
 interface SummariesState {
 	loaded: boolean;
@@ -23,12 +22,16 @@ export const SummariesProvider: React.FC = ({ children }) => {
 	useEffect(
 		() => {
 			if (site) {
-				return db.collection('sites').doc(site as DocKey).onSnapshot(docSnap => {
-					if (docSnap.exists) {
-						const { collections, forms, editors } = docSnap.data()!;
-						setSummariesState({ loaded: true, collections, forms, editors });
-					}
-				});
+				return firebase
+					.firestore()
+					.collection('sites')
+					.doc(site)
+					.onSnapshot(docSnap => {
+						if (docSnap.exists) {
+							const { collections, forms, editors } = docSnap.data()!;
+							setSummariesState({ loaded: true, collections, forms, editors });
+						}
+					});
 			}
 		},
 		[ site ]

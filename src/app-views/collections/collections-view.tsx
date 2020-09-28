@@ -8,7 +8,7 @@ import { authContext } from '../../context/auth-context';
 import { CollectionSummary } from '../../../firestore';
 import { useHistory } from 'react-router-dom';
 
-export const Collections = () => {
+export const CollectionsView = () => {
 	const { site } = useContext(authContext);
 	const { collections, loaded } = useContext(summariesContext);
 

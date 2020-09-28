@@ -1,31 +1,24 @@
 import { DataTable, PageHeader, Modal } from 'bdc-components';
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { DocumentReference } from 'typed-firestore';
-import { SubmissionSummary, FormDoc, DocKey, SubmissionSummaryData, FieldMap, SubmissionDoc } from '../../../firestore';
+import { SubmissionSummary, FormDoc, SubmissionSummaryData } from '../../../firestore';
 import { authContext } from '../../context/auth-context';
-import { db } from '../../firebase';
+import firebase from '../../firebase';
 import { AppView } from '../app-view';
 
-interface Form {
-	name: string;
-	fields: string[];
-	submissions: SubmissionSummary[];
-}
-
-export const Form: React.FC<RouteComponentProps<{ page: string }>> = props => {
+export const FormView: React.FC<RouteComponentProps<{ page: string }>> = props => {
 	const { site } = useContext(authContext);
 	
 	const [ form, setForm ] = useState<FormDoc | undefined>();
 	const [ currentSubmission, setCurrentSubmission ] = useState<Submission | undefined>()
 
 	useEffect(() => (
-		db.collection('sites')
-			.doc(site as DocKey)
+		firebase.firestore().collection('sites')
+			.doc(site)
 			.collection('forms')
-			.doc(props.match.params.page as DocKey)
+			.doc(props.match.params.page)
 			.onSnapshot(docSnap => {
-				setForm(docSnap.data())
+				setForm(docSnap.data() as FormDoc)
 			}
 	)), [ site, props.match.params.page ]);
 
@@ -33,22 +26,18 @@ export const Form: React.FC<RouteComponentProps<{ page: string }>> = props => {
 		id: string
 		submittedOn: firebase.firestore.Timestamp
 		data: SubmissionSummaryData
-		docRef: DocumentReference<{
-			key: DocKey;
-			value: SubmissionDoc<FieldMap>;
-			subCollections: {};
-		}>
+		docRef: firebase.firestore.DocumentReference
 
 		constructor (submission: SubmissionSummary) {
 			this.id = submission.id
 			this.submittedOn = submission.submittedOn
 			this.data = submission.data
-			this.docRef = db.collection('sites')
-				.doc(site as DocKey)
+			this.docRef = firebase.firestore().collection('sites')
+				.doc(site)
 				.collection('forms')
-				.doc(props.match.params.page as DocKey)
+				.doc(props.match.params.page)
 				.collection('submissions')
-				.doc(submission.id as DocKey)
+				.doc(submission.id)
 		}
 
 		delete = async () => {

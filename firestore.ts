@@ -55,20 +55,20 @@ export type ItemDoc = {
 
 export type Field = {
 	type: 'text' | 'option' | 'date' | 'file';
-	label: string | null;
-	helpText: string | null;
-	required: boolean | null;
+	label?: string;
+	helpText?: string;
+	required?: boolean;
 };
 
 export type TextFieldStructure = Field & {
 	type: 'text';
-	multiline: boolean;
+	multiline?: boolean;
 };
 
 export type OptionFieldStructure = Field & {
 	type: 'option';
 	options: string[];
-	multi: boolean;
+	multi?: boolean;
 };
 
 export type DateFieldStructure = Field & {
@@ -77,7 +77,7 @@ export type DateFieldStructure = Field & {
 
 export type FileFieldStructure = Field & {
 	type: 'file';
-	fileTypes: string[] | null;
+	fileTypes?: string[];
 };
 
 export type FieldStructure =
@@ -133,5 +133,3 @@ export type SiteDoc = {
 	forms: FormSummary[];
 	editors: EditorSummary[];
 };
-
-export type DocKey = string & { _docId: never };

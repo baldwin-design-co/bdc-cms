@@ -44,6 +44,7 @@ export const SideBar = () => {
 			>
 				<MenuIcon />
 			</IconButton>
+
 			{helpVisible ? <HelpMenu setHelpVisibility={setHelpVisibility} /> : null}
 		</nav>
 	);

@@ -50,15 +50,6 @@ section.app {
 	align-items: start;
 }
 
-section.sign-in {
-	width: 100vw;
-	height: 100vh;
-	display: grid;
-	place-items: center;
-	margin: 0;
-	padding: 0;
-}
-
 .container {
 	width: 100%;
 	max-width: 1100px;
@@ -101,17 +92,4 @@ a {
 
 p {
 	margin: 0;
-}
-
-.dashboard-grid {
-	width: 100%;
-	height: calc(100vh - 256px);
-	display: grid;
-	grid-template-columns: repeat(6, 1fr);
-	grid-template-rows: repeat(2, 1fr);
-	gap: 24px;
-}
-
-.MuiSnackbar-root {
-	margin-left: 100px;
 }
