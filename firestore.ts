@@ -32,8 +32,8 @@ export type FormDoc<T extends FieldMap = FieldMap> = {
 
 export type ItemDataValue <T extends FieldStructure = FieldStructure> =
 	  T extends TextFieldStructure ? string
-	: T extends DateFieldStructure & { required: true } ? firebase.firestore.Timestamp
-	: T extends DateFieldStructure ? firebase.firestore.Timestamp | null
+	: T extends DateFieldStructure & { required: true } ? firebase.firestore.Timestamp | Date
+	: T extends DateFieldStructure ? firebase.firestore.Timestamp | Date | null
 	// : T extends OptionFieldStructure & { multi: true } ? string[]
 	: T extends OptionFieldStructure & { required: true } ? string | string[]
 	: T extends OptionFieldStructure ? string | string[] | null

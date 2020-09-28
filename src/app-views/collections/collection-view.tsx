@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { CollectionDoc, FieldStructure, FieldStructures, ItemData, ItemDoc, ItemStatus, ItemSummary } from '../../../firestore';
-import { DataTable, FormErrors, FormModal, FormValues, PageHeader } from 'bdc-components';
-import { NoteAddOutlined as NewItemIcon } from '@material-ui/icons';
+import { DataTable, FormErrors, FormModal, FormValues, InitialValues, PageHeader } from 'bdc-components';
+import { NoteAddOutlined as NewItemIcon, DeleteOutline as DeleteIcon } from '@material-ui/icons';
 import { authContext } from '../../context/auth-context';
 import firebase from '../../firebase';
 import { AppView } from '../app-view';
@@ -44,14 +44,10 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 		});
 	};
 
-	const structureData = async (values: FormValues) => {
+	const packData = async (values: FormValues) => {
 		const fieldStructures = collection?.fieldStructures || {}
 		const fields = Object.keys(fieldStructures)
-		const item: ItemDoc = {
-			name: values.name as string,
-			status: 'published',
-			data: {}
-		}
+		const itemData: ItemData = {}
 
 		for (const field of fields) {
 			const fieldStructure = fieldStructures[field]
@@ -61,15 +57,34 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 				const storageRef = firebase.storage().ref().child(`${site}/${collection?.name}/${values.name}`);
 				const url = await uploadFile(storageRef, value)
 				
-				item.data[field] = url as string
+				itemData[field] = url as string
 			} else if (fieldStructure.type === 'date' && value instanceof Date) {
-				item.data[field] = firebase.firestore.Timestamp.fromDate(value)
+				itemData[field] = firebase.firestore.Timestamp.fromDate(value)
 			} else {
-				item.data[field] = value as string | string[] | null
+				itemData[field] = value as string | string[] | null
 			}
 		}
 
-		return item
+		return itemData
+	}
+
+	const unpackData = (values: ItemData) => {
+		const fieldStructures = collection?.fieldStructures || {}
+		const fields = Object.keys(fieldStructures)
+		const itemData: InitialValues = {}
+
+		fields.forEach(field => {
+			const fieldStructure = fieldStructures[field]
+			const value = values[field]
+
+			if (fieldStructure.type === 'date' && value instanceof firebase.firestore.Timestamp) {
+				itemData[field] = value.toDate()
+			} else {
+				itemData[field] = value as string | Date | File | null
+			}
+		})
+
+		return itemData
 	}
 	
 	const validateFileSize = (values: FormValues) => {
@@ -114,7 +129,12 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 		}
 
 		publish = async (values: FormValues) => {
-			const itemDoc = await structureData(values)
+			const itemData = await packData(values)
+			const itemDoc: ItemDoc = {
+				name: itemData.name as string,
+				data: itemData,
+				status: 'published'
+			}
 			
 			await firebase.firestore()
 				.collection('sites')
@@ -156,7 +176,19 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 
 		save = () => {}
 
-		Modal = () => null
+		delete = () => {}
+
+		Modal = () => (
+			<FormModal
+				name={this.name}
+				fieldStructures={collection?.fieldStructures || {}}
+				fieldOrder={collection?.fieldOrder}
+				initialValues={unpackData(this.data)}
+				onClose={() => setCurrentItem(undefined)}
+				actions={[ { label: 'Save', action: this.save, validate: true }, { label: <DeleteIcon />, action: this.delete } ]}
+				validate={validateFileSize}
+			/>
+		)
 	}
 
 	const included = (item: Item) => 
