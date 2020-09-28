@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { CollectionDoc, FieldStructure, FieldStructures, ItemData, ItemStatus, ItemSummary } from '../../../firestore';
-import { DataTable, FormModal, PageHeader } from 'bdc-components';
+import { CollectionDoc, FieldStructure, FieldStructures, ItemData, ItemDoc, ItemStatus, ItemSummary } from '../../../firestore';
+import { DataTable, FormErrors, FormModal, FormValues, PageHeader } from 'bdc-components';
 import { NoteAddOutlined as NewItemIcon } from '@material-ui/icons';
 import { authContext } from '../../context/auth-context';
 import firebase from '../../firebase';
@@ -29,29 +29,71 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 		[ site, props.match.params.page ]
 	);
 
-	class Item implements ItemSummary {
-		id: string;
-		data: ItemData;
-		name: string;
-		status: ItemStatus;
-		modified: firebase.firestore.Timestamp;
+	const uploadFile = (storageRef: firebase.storage.Reference, file: File) => {
+		return new Promise((resolve, reject) => {
+			const uploadTask = storageRef.put(file);
+	
+			const onSnapshot = (snap: firebase.storage.UploadTaskSnapshot) => {};
+			const onError = (error: Error) => reject(error);
+			const onSuccess = async () => {
+				const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL();
+				resolve(downloadUrl as string);
+			};
+	
+			uploadTask.on('state_changed', onSnapshot, onError, onSuccess);
+		});
+	};
 
-		constructor (itemSummary: ItemSummary) {
-			this.id = itemSummary.id
-			this.data = itemSummary.data
-			this.name = itemSummary.name
-			this.status = itemSummary.status
-			this.modified = itemSummary.modified
+	const structureData = async (values: FormValues) => {
+		const fieldStructures = collection?.fieldStructures || {}
+		const fields = Object.keys(fieldStructures)
+		const item: ItemDoc = {
+			name: values.name as string,
+			status: 'published',
+			data: {}
 		}
 
-		save = () => {}
+		for (const field of fields) {
+			const fieldStructure = fieldStructures[field]
+			const value = values[field]
 
-		Modal = () => null
+			if (fieldStructure.type === 'file' && value instanceof File) {
+				const storageRef = firebase.storage().ref().child(`${site}/${collection?.name}/${values.name}`);
+				const url = await uploadFile(storageRef, value)
+				
+				item.data[field] = url as string
+			} else if (fieldStructure.type === 'date' && value instanceof Date) {
+				item.data[field] = firebase.firestore.Timestamp.fromDate(value)
+			} else {
+				item.data[field] = value as string | string[] | null
+			}
+		}
+
+		return item
+	}
+	
+	const validateFileSize = (values: FormValues) => {
+		const fieldStructures = collection?.fieldStructures || {}
+		const validation: FormErrors = {
+			valid: true,
+			errors: {}
+		}
+
+		Object.keys(fieldStructures).forEach(field => {
+			const fieldStructure = fieldStructures[field]
+			const value = values[field] 
+
+			if (fieldStructure.type === 'file' && value instanceof File) {
+				if (value.size > 2000000) validation.errors[field] = 'The max file size is 2MB'
+			}
+		})
+
+		return validation
 	}
 
 	class NewItem {
 		data: ItemData
-		status = 'published'
+		status: ItemStatus = 'published'
 
 		constructor (fieldStructures: FieldStructures) {
 			const defaultValue = (field: FieldStructure): string | string[] | null => {
@@ -71,7 +113,19 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 			}, {})
 		}
 
-		publish = () => {}
+		publish = async (values: FormValues) => {
+			const itemDoc = await structureData(values)
+			
+			await firebase.firestore()
+				.collection('sites')
+				.doc(site)
+				.collection('collections')
+				.doc(props.match.params.page)
+				.collection('items')
+				.add(itemDoc)
+			
+			setCurrentItem(undefined)
+		}
 
 		Modal = () => (
 			<FormModal
@@ -80,8 +134,29 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 				fieldOrder={collection?.fieldOrder}
 				onClose={() => setCurrentItem(undefined)}
 				actions={[ { label: 'Publish', action: this.publish, validate: true } ]}
+				validate={validateFileSize}
 			/>
 		)
+	}
+
+	class Item implements ItemSummary {
+		id: string;
+		data: ItemData;
+		name: string;
+		status: ItemStatus;
+		modified: firebase.firestore.Timestamp;
+
+		constructor (itemSummary: ItemSummary) {
+			this.id = itemSummary.id
+			this.data = itemSummary.data
+			this.name = itemSummary.name
+			this.status = itemSummary.status
+			this.modified = itemSummary.modified
+		}
+
+		save = () => {}
+
+		Modal = () => null
 	}
 
 	const included = (item: Item) => 
