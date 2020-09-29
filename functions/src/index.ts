@@ -3,4 +3,3 @@ admin.initializeApp();
 
 exports.collections = require('./collections');
 exports.forms = require('./forms');
-exports.editors = require('./editors');

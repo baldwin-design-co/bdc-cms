@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { ItemSummary, CollectionSummary } from '../../firestore';
+import { ItemSummary, CollectionSummary, ItemDoc } from '../../firestore';
 
 exports.AggregateItems = functions.firestore
 	.document('sites/{site}/collections/{collectionName}/items/{id}')
@@ -13,14 +13,14 @@ exports.AggregateItems = functions.firestore
 			.doc(collectionName);
 
 		if (change.before.exists && change.after.exists) {
-			//update trigger// √
+			//update trigger
 			return admin.firestore().runTransaction(async transaction => {
 				const [ collectionDoc, siteDoc ] = await Promise.all([
 					transaction.get(collectionRef),
 					transaction.get(siteRef)
 				]);
 
-				const { name, status, data } = change.after.data()!;
+				const { name, status, data } = change.after.data()! as ItemDoc;
 				const modified = change.after.updateTime!;
 
 				const itemsArray: ItemSummary[] = collectionDoc.data()!.items;
@@ -42,11 +42,11 @@ exports.AggregateItems = functions.firestore
 				transaction.update(siteRef, { collections: collectionsArray });
 			});
 		} else if (change.after.exists) {
-			//create trigger// √
+			//create trigger
 			return admin.firestore().runTransaction(async transaction => {
 				const siteDoc = await transaction.get(siteRef);
 
-				const { name, status, data } = change.after.data()!;
+				const { name, status, data } = change.after.data()! as ItemDoc;
 				const modified = change.after.createTime!;
 				const itemSummary: ItemSummary = { name, id, status, modified, data };
 
@@ -68,12 +68,12 @@ exports.AggregateItems = functions.firestore
 				transaction.update(siteRef, { collections: collectionsArray });
 			});
 		} else {
-			//delete trigger// √
+			//delete trigger
 			return admin.firestore().runTransaction(async transaction => {
 				const siteDoc = await transaction.get(siteRef);
 
-				const { name, status, data } = change.before.data()!;
-				const modified = change.before.updateTime!;
+				const { name, status, data } = change.before.data()! as ItemDoc;
+				const modified = change.before.updateTime || change.before.createTime!;
 				const itemSummary: ItemSummary = { name, id, status, modified, data };
 
 				const collectionsArray: CollectionSummary[] = siteDoc.data()!.collections;
@@ -99,7 +99,6 @@ exports.AggregateItems = functions.firestore
 exports.AggregateCollectionsCreate = functions.firestore
 	.document('sites/{site}/collections/{collection}')
 	.onCreate((docSnap, context) => {
-		//checked// √
 		const { site } = context.params;
 		const siteRef = admin.firestore().collection('sites').doc(site);
 
@@ -120,7 +119,6 @@ exports.AggregateCollectionsCreate = functions.firestore
 exports.AggregateCollectionsDelete = functions.firestore
 	.document('sites/{site}/collections/{collection}')
 	.onDelete((docSnap, context) => {
-		//checked// √
 		const { site } = context.params;
 		const siteRef = admin.firestore().collection('sites').doc(site);
 

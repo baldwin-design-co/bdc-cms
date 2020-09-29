@@ -7,6 +7,7 @@ import { authContext } from '../../context/auth-context';
 import firebase from '../../firebase';
 import { AppView } from '../app-view';
 import { formatDate } from './format-date';
+import uniqId from 'uniqid'
 
 export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = props => {
 	const { site } = useContext(authContext);
@@ -44,7 +45,7 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 		});
 	};
 
-	const packData = async (values: FormValues) => {
+	const packData = async (values: FormValues, docId: string) => {
 		const fieldStructures = collection?.fieldStructures || {}
 		const fields = Object.keys(fieldStructures)
 		const itemData: ItemData = {}
@@ -54,7 +55,7 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 			const value = values[field]
 
 			if (fieldStructure.type === 'file' && value instanceof File) {
-				const storageRef = firebase.storage().ref().child(`${site}/${collection?.name}/${values.name}`);
+				const storageRef = firebase.storage().ref().child(`${site}/${collection?.name}/${docId}-${field}`);
 				const url = await uploadFile(storageRef, value)
 				
 				itemData[field] = url as string
@@ -129,7 +130,8 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 		}
 
 		publish = async (values: FormValues) => {
-			const itemData = await packData(values)
+			const docId = uniqId()
+			const itemData = await packData(values, docId)
 			const itemDoc: ItemDoc = {
 				name: itemData.name as string,
 				data: itemData,
@@ -142,7 +144,8 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 				.collection('collections')
 				.doc(props.match.params.page)
 				.collection('items')
-				.add(itemDoc)
+				.doc(docId)
+				.set(itemDoc)
 			
 			setCurrentItem(undefined)
 		}
@@ -174,9 +177,50 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 			this.modified = itemSummary.modified
 		}
 
-		save = () => {}
+		save = async (values: FormValues) => {
+			const itemData = await packData(values, this.id)
+			const itemDoc = {
+				name: itemData.name,
+				data: itemData,
+				status: 'published'
+			}
 
-		delete = () => {}
+			await firebase.firestore()
+				.collection('sites')
+				.doc(site)
+				.collection('collections')
+				.doc(props.match.params.page)
+				.collection('items')
+				.doc(this.id)
+				.update(itemDoc)
+
+			setCurrentItem(undefined)
+		}
+
+		delete = async () => {
+			const fieldStructures = collection?.fieldStructures || {}
+			const fields = Object.keys(fieldStructures)
+
+			for (const field of fields) {
+				const fieldStructure = fieldStructures[field]
+
+				if (fieldStructure.type === 'file') {
+					const storageRef = firebase.storage().ref().child(`${site}/${collection?.name}/${this.id}-${field}`);
+					await storageRef.delete()
+				}
+			}
+
+			await firebase.firestore()
+				.collection('sites')
+				.doc(site)
+				.collection('collections')
+				.doc(props.match.params.page)
+				.collection('items')
+				.doc(this.id)
+				.delete()
+
+			setCurrentItem(undefined)
+		}
 
 		Modal = () => (
 			<FormModal
@@ -185,7 +229,10 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 				fieldOrder={collection?.fieldOrder}
 				initialValues={unpackData(this.data)}
 				onClose={() => setCurrentItem(undefined)}
-				actions={[ { label: 'Save', action: this.save, validate: true }, { label: <DeleteIcon />, action: this.delete } ]}
+				actions={[
+					{ label: <DeleteIcon fontSize='small' />, action: this.delete },
+					{ label: 'Save', action: this.save, validate: true }
+				]}
 				validate={validateFileSize}
 			/>
 		)

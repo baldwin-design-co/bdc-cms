@@ -39,7 +39,7 @@ export type ItemDataValue <T extends FieldStructure = FieldStructure> =
 	: T extends OptionFieldStructure ? string | string[] | null
 	: T extends FileFieldStructure & { required: true } ? string | File
 	: T extends FileFieldStructure ? string | File | null
-	: string | string[] | firebase.firestore.Timestamp | null
+	: string | string[] | File | Date | firebase.firestore.Timestamp | null
 
 export type ItemData<T extends FieldStructures = FieldStructures> = {
 	[k in keyof T]: ItemDataValue<T[k]>
