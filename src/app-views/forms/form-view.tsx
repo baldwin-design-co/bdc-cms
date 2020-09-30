@@ -3,11 +3,13 @@ import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { SubmissionSummary, FormDoc, SubmissionSummaryData } from '../../../firestore';
 import { authContext } from '../../context/auth-context';
+import { feedbackContext } from '../../context/feedback-context';
 import firebase from '../../firebase';
 import { AppView } from '../app-view';
 
 export const FormView: React.FC<RouteComponentProps<{ page: string }>> = props => {
 	const { site } = useContext(authContext);
+	const { setFeedback } = useContext(feedbackContext)
 	
 	const [ form, setForm ] = useState<FormDoc | undefined>();
 	const [ currentSubmission, setCurrentSubmission ] = useState<Submission | undefined>()
@@ -41,8 +43,13 @@ export const FormView: React.FC<RouteComponentProps<{ page: string }>> = props =
 		}
 
 		delete = async () => {
-			await this.docRef.delete()
-			setCurrentSubmission(undefined)
+			try {
+				await this.docRef.delete()
+				setCurrentSubmission(undefined)
+				setFeedback(true, 'Submission deleted', 'success')
+			} catch {
+				setFeedback(true, 'Something went wrong deleting the submission', 'error')
+			}
 		}
 
 		Modal = () => {

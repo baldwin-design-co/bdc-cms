@@ -1,18 +1,18 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { SubmissionSummary, FormSummary, DocKey, SubmissionDoc } from '../../firestore';
+import { SubmissionSummary, FormSummary, SubmissionDoc } from './firestore';
 
 exports.AggregateSubmissions = functions.firestore
 	.document('sites/{site}/forms/{form}/submissions/{id}')
 	.onWrite(async (change, context) => {
 		const { site, form, id } = context.params;
-		const siteRef = admin.firestore().collection('sites').doc(site as DocKey);
+		const siteRef = admin.firestore().collection('sites').doc(site);
 		const formRef = admin
 			.firestore()
 			.collection('sites')
-			.doc(site as DocKey)
+			.doc(site)
 			.collection('forms')
-			.doc(form as DocKey);
+			.doc(form);
 
 		if (change.after.exists && !change.before.exists) {
 			//create trigger// √
@@ -38,11 +38,18 @@ exports.AggregateSubmissions = functions.firestore
 		} else if (change.before.exists && !change.after.exists) {
 			//delete trigger// √
 			return admin.firestore().runTransaction(async transaction => {
-				const siteDoc = await transaction.get(siteRef);
+				const siteDocRequest = transaction.get(siteRef);
+				const formDocRequest = transaction.get(formRef);
 
-				const data: SubmissionDoc = change.before.data()!;
-				const submittedOn = change.before.createTime!;
-				const submissionSummary: SubmissionSummary = { id, submittedOn, data };
+				const [ siteDoc, formDoc ] = await Promise.all([
+					siteDocRequest,
+					formDocRequest
+				]);
+
+				const submissionsArray: SubmissionSummary[] = formDoc.data()!.submissions;
+				const submissionSummary = submissionsArray.find(
+					submission => submission.id === id
+				);
 
 				const formsArray: FormSummary[] = siteDoc.data()!.forms;
 				const formIndex = formsArray.findIndex(

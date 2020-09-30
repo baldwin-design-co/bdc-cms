@@ -10,6 +10,7 @@ import { SignInView } from './auth-views/sign-in-view';
 import { AuthProvider } from './context/auth-context';
 import { SummariesProvider } from './context/summaries-context';
 import { PrivateRoute } from './private-route';
+import { FeedbackProvider } from './context/feedback-context';
 
 const App = () => (
 	<AuthProvider>
@@ -17,10 +18,16 @@ const App = () => (
 			<ThemeProvider theme={bdcTheme}>
 				<Route path="/sign-in" component={SignInView} />
 				<SummariesProvider>
-					<PrivateRoute exact path="/collections" component={CollectionsView} />
-					<PrivateRoute exact path="/collections/:page" component={CollectionView} />
-					<PrivateRoute exact path="/forms" component={FormsView} />
-					<PrivateRoute exact path="/forms/:page" component={FormView} />
+					<FeedbackProvider>
+						<PrivateRoute exact path="/collections" component={CollectionsView} />
+						<PrivateRoute
+							exact
+							path="/collections/:page"
+							component={CollectionView}
+						/>
+						<PrivateRoute exact path="/forms" component={FormsView} />
+						<PrivateRoute exact path="/forms/:page" component={FormView} />
+					</FeedbackProvider>
 				</SummariesProvider>
 			</ThemeProvider>
 		</BrowserRouter>

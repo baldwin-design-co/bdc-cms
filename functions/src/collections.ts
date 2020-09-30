@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { ItemSummary, CollectionSummary, ItemDoc } from '../../firestore';
+import { ItemSummary, CollectionSummary, ItemDoc } from './firestore';
 
 exports.AggregateItems = functions.firestore
 	.document('sites/{site}/collections/{collectionName}/items/{id}')
@@ -70,11 +70,16 @@ exports.AggregateItems = functions.firestore
 		} else {
 			//delete trigger
 			return admin.firestore().runTransaction(async transaction => {
-				const siteDoc = await transaction.get(siteRef);
+				const siteDocRequest = transaction.get(siteRef);
+				const collectionDoqRequest = transaction.get(collectionRef);
 
-				const { name, status, data } = change.before.data()! as ItemDoc;
-				const modified = change.before.updateTime || change.before.createTime!;
-				const itemSummary: ItemSummary = { name, id, status, modified, data };
+				const [ siteDoc, collectionDoc ] = await Promise.all([
+					siteDocRequest,
+					collectionDoqRequest
+				]);
+
+				const itemsArray: ItemSummary[] = collectionDoc.data()!.items;
+				const itemSummary = itemsArray.find(item => item.id === id);
 
 				const collectionsArray: CollectionSummary[] = siteDoc.data()!.collections;
 				const collectionIndex = collectionsArray.findIndex(
@@ -83,7 +88,7 @@ exports.AggregateItems = functions.firestore
 				const itemCount = collectionsArray[collectionIndex].itemCount - 1;
 				const collectionSummary: CollectionSummary = {
 					...collectionsArray[collectionIndex],
-					modified,
+					modified: admin.firestore.Timestamp.now(),
 					itemCount
 				};
 

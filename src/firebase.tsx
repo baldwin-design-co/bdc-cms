@@ -13,4 +13,12 @@ firebase.initializeApp({
 	appId: '1:499203573769:web:fdc4fbbb969942e09c10d8'
 });
 
+// eslint-disable-next-line no-restricted-globals
+if (location.hostname === 'localhost') {
+	firebase.firestore().settings({
+		host: 'localhost:8080',
+		ssl: false
+	});
+}
+
 export default firebase;

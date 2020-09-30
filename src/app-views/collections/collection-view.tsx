@@ -8,9 +8,11 @@ import firebase from '../../firebase';
 import { AppView } from '../app-view';
 import { formatDate } from './format-date';
 import uniqId from 'uniqid'
+import { feedbackContext } from '../../context/feedback-context';
 
 export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = props => {
 	const { site } = useContext(authContext);
+	const { setFeedback } = useContext(feedbackContext)
 
 	const [ loading, setLoading ] = useState(true)
 	const [ searchTerm, setSearchTerm ] = useState('')
@@ -130,24 +132,29 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 		}
 
 		publish = async (values: FormValues) => {
-			const docId = uniqId()
-			const itemData = await packData(values, docId)
-			const itemDoc: ItemDoc = {
-				name: itemData.name as string,
-				data: itemData,
-				status: 'published'
+			try {
+				const docId = uniqId()
+				const itemData = await packData(values, docId)
+				const itemDoc: ItemDoc = {
+					name: itemData.name as string,
+					data: itemData,
+					status: 'published'
+				}
+				
+				await firebase.firestore()
+					.collection('sites')
+					.doc(site)
+					.collection('collections')
+					.doc(props.match.params.page)
+					.collection('items')
+					.doc(docId)
+					.set(itemDoc)
+				
+				setCurrentItem(undefined)
+				setFeedback(true, `Published ${itemDoc.name}`, 'success')
+			} catch {
+				setFeedback(true, `Something went wrong publishing ${values.name}`, 'error')
 			}
-			
-			await firebase.firestore()
-				.collection('sites')
-				.doc(site)
-				.collection('collections')
-				.doc(props.match.params.page)
-				.collection('items')
-				.doc(docId)
-				.set(itemDoc)
-			
-			setCurrentItem(undefined)
 		}
 
 		Modal = () => (
@@ -178,48 +185,58 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 		}
 
 		save = async (values: FormValues) => {
-			const itemData = await packData(values, this.id)
-			const itemDoc = {
-				name: itemData.name,
-				data: itemData,
-				status: 'published'
+			try {
+				const itemData = await packData(values, this.id)
+				const itemDoc = {
+					name: itemData.name,
+					data: itemData,
+					status: 'published'
+				}
+
+				await firebase.firestore()
+					.collection('sites')
+					.doc(site)
+					.collection('collections')
+					.doc(props.match.params.page)
+					.collection('items')
+					.doc(this.id)
+					.update(itemDoc)
+
+				setCurrentItem(undefined)
+				setFeedback(true, `Updated ${itemDoc.name}`, 'success')
+			} catch {
+				setFeedback(true, `Something went wrong saving ${this.name}`, 'error')
 			}
-
-			await firebase.firestore()
-				.collection('sites')
-				.doc(site)
-				.collection('collections')
-				.doc(props.match.params.page)
-				.collection('items')
-				.doc(this.id)
-				.update(itemDoc)
-
-			setCurrentItem(undefined)
 		}
 
 		delete = async () => {
-			const fieldStructures = collection?.fieldStructures || {}
-			const fields = Object.keys(fieldStructures)
+			try {
+				const fieldStructures = collection?.fieldStructures || {}
+				const fields = Object.keys(fieldStructures)
 
-			for (const field of fields) {
-				const fieldStructure = fieldStructures[field]
+				for (const field of fields) {
+					const fieldStructure = fieldStructures[field]
 
-				if (fieldStructure.type === 'file') {
-					const storageRef = firebase.storage().ref().child(`${site}/${collection?.name}/${this.id}-${field}`);
-					await storageRef.delete()
+					if (fieldStructure.type === 'file') {
+						const storageRef = firebase.storage().ref().child(`${site}/${collection?.name}/${this.id}-${field}`);
+						await storageRef.delete()
+					}
 				}
+
+				await firebase.firestore()
+					.collection('sites')
+					.doc(site)
+					.collection('collections')
+					.doc(props.match.params.page)
+					.collection('items')
+					.doc(this.id)
+					.delete()
+
+				setCurrentItem(undefined)
+				setFeedback(true, `Deleted ${this.name}`, 'success')
+			} catch {
+				setFeedback(true, `Something went wrong deleting ${this.name}`, 'error')
 			}
-
-			await firebase.firestore()
-				.collection('sites')
-				.doc(site)
-				.collection('collections')
-				.doc(props.match.params.page)
-				.collection('items')
-				.doc(this.id)
-				.delete()
-
-			setCurrentItem(undefined)
 		}
 
 		Modal = () => (
