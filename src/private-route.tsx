@@ -11,7 +11,7 @@ interface PrivateRouteProps {
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ component, path, exact }) => {
 	const { user } = useContext(authContext);
 
-	const redirect = () => <Redirect to="/sign-in" />;
+	const redirect = () => <Redirect to={`${process.env.PUBLIC_URL}/sign-in`} />;
 
 	return user ? (
 		<Route path={path} exact={!!exact} component={component} />

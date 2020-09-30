@@ -41,7 +41,8 @@ export const FormsView: React.FC = () => {
 					submissionCount: { label: 'Submissions' }
 				}}
 				items={getTableItems(forms || [])}
-				itemClickHandler={form => history.push(`forms/${form.id}`)}
+				itemClickHandler={form =>
+					history.push(`${process.env.PUBLIC_URL}/forms/${form.id}`)}
 				itemIcon={<FormIcon />}
 				loading={!loaded}
 				identifyingField="name"

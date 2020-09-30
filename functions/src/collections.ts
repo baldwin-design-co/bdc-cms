@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { ItemSummary, CollectionSummary, ItemDoc } from './firestore';
+import { ItemSummary, CollectionSummary, ItemDoc } from './index';
 
 exports.AggregateItems = functions.firestore
 	.document('sites/{site}/collections/{collectionName}/items/{id}')

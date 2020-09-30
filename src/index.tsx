@@ -13,25 +13,41 @@ import { PrivateRoute } from './private-route';
 import { FeedbackProvider } from './context/feedback-context';
 
 const App = () => (
-	<AuthProvider>
-		<BrowserRouter>
+	<BrowserRouter basename="/cms">
+		<AuthProvider>
 			<ThemeProvider theme={bdcTheme}>
-				<Route path="/sign-in" component={SignInView} />
+				<Route
+					exact
+					path={`${process.env.PUBLIC_URL}/sign-in`}
+					component={SignInView}
+				/>
 				<SummariesProvider>
 					<FeedbackProvider>
-						<PrivateRoute exact path="/collections" component={CollectionsView} />
 						<PrivateRoute
 							exact
-							path="/collections/:page"
+							path={`${process.env.PUBLIC_URL}/collections`}
+							component={CollectionsView}
+						/>
+						<PrivateRoute
+							exact
+							path={`${process.env.PUBLIC_URL}/collections/:page`}
 							component={CollectionView}
 						/>
-						<PrivateRoute exact path="/forms" component={FormsView} />
-						<PrivateRoute exact path="/forms/:page" component={FormView} />
+						<PrivateRoute
+							exact
+							path={`${process.env.PUBLIC_URL}/forms`}
+							component={FormsView}
+						/>
+						<PrivateRoute
+							exact
+							path={`${process.env.PUBLIC_URL}/forms/:page`}
+							component={FormView}
+						/>
 					</FeedbackProvider>
 				</SummariesProvider>
 			</ThemeProvider>
-		</BrowserRouter>
-	</AuthProvider>
+		</AuthProvider>
+	</BrowserRouter>
 );
 
 ReactDOM.render(<App />, document.querySelector('#root'));

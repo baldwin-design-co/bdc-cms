@@ -21,7 +21,7 @@ export const SideBar = () => {
 				enterNextDelay={100}
 				leaveDelay={100}
 			>
-				<NavLink className="navlink" to="/collections">
+				<NavLink className="navlink" to={`${process.env.PUBLIC_URL}/collections`}>
 					<CollectionsIcon style={{ width: 36, height: 36 }} />
 				</NavLink>
 			</Tooltip>
@@ -33,7 +33,7 @@ export const SideBar = () => {
 				enterNextDelay={100}
 				leaveDelay={100}
 			>
-				<NavLink className="navlink" to="/forms">
+				<NavLink className="navlink" to={`${process.env.PUBLIC_URL}/forms`}>
 					<FormsIcon style={{ width: 36, height: 36 }} />
 				</NavLink>
 			</Tooltip>

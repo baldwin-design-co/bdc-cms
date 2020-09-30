@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { SubmissionSummary, FormSummary, SubmissionDoc } from './firestore';
+import { SubmissionSummary, FormSummary, SubmissionDoc } from './index';
 
 exports.AggregateSubmissions = functions.firestore
 	.document('sites/{site}/forms/{form}/submissions/{id}')
