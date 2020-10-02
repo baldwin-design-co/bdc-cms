@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { CollectionDoc, FieldStructure, FieldStructures, ItemData, ItemDoc, ItemStatus, ItemSummary } from '../../../firestore';
+import { CollectionDoc, FieldStructure, FieldStructures, ItemData, ItemDoc, ItemStatus, ItemSummary } from '../../firestore';
 import { DataTable, FormErrors, FormModal, FormValues, InitialValues, PageHeader } from 'bdc-components';
 import { NoteAddOutlined as NewItemIcon, DeleteOutline as DeleteIcon } from '@material-ui/icons';
 import { authContext } from '../../context/auth-context';

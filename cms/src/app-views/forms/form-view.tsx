@@ -1,7 +1,7 @@
 import { DataTable, PageHeader, Modal } from 'bdc-components';
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { SubmissionSummary, FormDoc, SubmissionSummaryData } from '../../../firestore';
+import { SubmissionSummary, FormDoc, SubmissionSummaryData } from '../../firestore';
 import { authContext } from '../../context/auth-context';
 import { feedbackContext } from '../../context/feedback-context';
 import firebase from '../../firebase';

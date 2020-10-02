@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { CollectionSummary, FormSummary, EditorSummary } from '../../firestore';
+import { CollectionSummary, FormSummary, EditorSummary } from '../firestore';
 import { authContext } from './auth-context';
 import firebase from '../firebase';
 
