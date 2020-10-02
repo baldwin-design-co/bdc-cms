@@ -16,33 +16,17 @@ const App = () => (
 	<BrowserRouter basename="/cms">
 		<AuthProvider>
 			<ThemeProvider theme={bdcTheme}>
-				<Route
-					exact
-					path={`${process.env.PUBLIC_URL}/sign-in`}
-					component={SignInView}
-				/>
+				<Route exact path="/sign-in" component={SignInView} />
 				<SummariesProvider>
 					<FeedbackProvider>
+						<PrivateRoute exact path="/collections" component={CollectionsView} />
 						<PrivateRoute
 							exact
-							path={`${process.env.PUBLIC_URL}/collections`}
-							component={CollectionsView}
-						/>
-						<PrivateRoute
-							exact
-							path={`${process.env.PUBLIC_URL}/collections/:page`}
+							path="/collections/:page"
 							component={CollectionView}
 						/>
-						<PrivateRoute
-							exact
-							path={`${process.env.PUBLIC_URL}/forms`}
-							component={FormsView}
-						/>
-						<PrivateRoute
-							exact
-							path={`${process.env.PUBLIC_URL}/forms/:page`}
-							component={FormView}
-						/>
+						<PrivateRoute exact path="/forms" component={FormsView} />
+						<PrivateRoute exact path="/forms/:page" component={FormView} />
 					</FeedbackProvider>
 				</SummariesProvider>
 			</ThemeProvider>

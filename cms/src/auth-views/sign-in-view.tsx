@@ -7,7 +7,7 @@ import './sign-in-view.css';
 export const SignInView = () => {
 	const { user } = useContext(authContext);
 
-	if (user) return <Redirect to={`${process.env.PUBLIC_URL}/collections`} />;
+	if (user) return <Redirect to="/collections" />;
 
 	return (
 		<section className="sign-in">

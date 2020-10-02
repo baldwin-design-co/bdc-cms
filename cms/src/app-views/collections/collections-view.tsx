@@ -47,8 +47,7 @@ export const CollectionsView = () => {
 				loading={!loaded}
 				identifyingField="name"
 				itemIcon={<CollectionsIcon />}
-				itemClickHandler={collection =>
-					history.push(`${process.env.PUBLIC_URL}/collections/${collection.id}`)}
+				itemClickHandler={collection => history.push(`/collections/${collection.id}`)}
 			/>
 		</AppView>
 	);
