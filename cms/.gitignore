@@ -1,6 +1,0 @@
-**/node_modules/**
-**/build/**
-**/lib/**
-**/.DS_Store/**
-.DS_Store
-**.log
