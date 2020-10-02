@@ -7,7 +7,7 @@
 		"@material-ui/icons": "^4.9.1",
 		"@material-ui/lab": "^4.0.0-alpha.56",
 		"@types/uniqid": "^5.2.0",
-		"bdc-components": "^0.4.0",
+		"bdc-components": "^0.4.1",
 		"firebase": "^7.20.0",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
@@ -26,7 +26,11 @@
 		"extends": "react-app"
 	},
 	"browserslist": {
-		"production": [ ">0.2%", "not dead", "not op_mini all" ],
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
 		"development": [
 			"last 1 chrome version",
 			"last 1 firefox version",
