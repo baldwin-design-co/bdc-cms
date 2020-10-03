@@ -1,28 +1,21 @@
 import { DataTable, PageHeader, Modal } from 'bdc-components';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { SubmissionSummary, FormDoc, SubmissionSummaryData } from '../../firestore';
 import { authContext } from '../../context/auth-context';
 import { feedbackContext } from '../../context/feedback-context';
 import firebase from '../../firebase';
 import { AppView } from '../app-view';
+import { useFirestoreDocData } from 'reactfire'
 
 export const FormView: React.FC<RouteComponentProps<{ page: string }>> = props => {
 	const { site } = useContext(authContext);
 	const { setFeedback } = useContext(feedbackContext)
-	
-	const [ form, setForm ] = useState<FormDoc | undefined>();
-	const [ currentSubmission, setCurrentSubmission ] = useState<Submission | undefined>()
 
-	useEffect(() => (
-		firebase.firestore().collection('sites')
-			.doc(site)
-			.collection('forms')
-			.doc(props.match.params.page)
-			.onSnapshot(docSnap => {
-				setForm(docSnap.data() as FormDoc)
-			}
-	)), [ site, props.match.params.page ]);
+	const formRef = firebase.firestore().collection(`sites/${site}/forms`).doc(props.match.params.page)
+	const form = useFirestoreDocData<FormDoc | undefined>(formRef, { startWithValue: undefined })
+
+	const [ currentSubmission, setCurrentSubmission ] = useState<Submission | undefined>()
 
 	class Submission implements SubmissionSummary {
 		id: string

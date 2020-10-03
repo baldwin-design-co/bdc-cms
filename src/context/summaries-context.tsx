@@ -1,43 +1,33 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { CollectionSummary, FormSummary, EditorSummary } from '../firestore';
+import React, { createContext, useContext } from 'react';
+import { CollectionSummary, FormSummary, SiteDoc } from '../firestore';
 import { authContext } from './auth-context';
-import firebase from '../firebase';
+import { useFirestore, useFirestoreDocData } from 'reactfire';
 
 interface SummariesState {
-	loaded: boolean;
 	collections?: CollectionSummary[];
 	forms?: FormSummary[];
-	editors?: EditorSummary[];
 }
 
-const defaultSummariesState: SummariesState = { loaded: false };
-
-export const summariesContext = createContext(defaultSummariesState);
+export const summariesContext = createContext<SummariesState>({});
 
 export const SummariesProvider: React.FC = ({ children }) => {
+	const firestore = useFirestore();
+
 	const { site } = useContext(authContext);
+	const siteRef = firestore.collection('sites').doc(site);
 
-	const [ summariesState, setSummariesState ] = useState(defaultSummariesState);
+	const { collections, forms } = useFirestoreDocData<SiteDoc>(siteRef);
 
-	useEffect(
-		() => {
-			if (site) {
-				return firebase
-					.firestore()
-					.collection('sites')
-					.doc(site)
-					.onSnapshot(docSnap => {
-						if (docSnap.exists) {
-							const { collections, forms, editors } = docSnap.data()!;
-							setSummariesState({ loaded: true, collections, forms, editors });
-						}
-					});
-			}
-		},
-		[ site ]
-	);
+	if (window.location.hostname === 'localhost') {
+		firestore.settings({
+			host: 'localhost:8080',
+			ssl: false
+		});
+	}
 
 	return (
-		<summariesContext.Provider value={summariesState}>{children}</summariesContext.Provider>
+		<summariesContext.Provider value={{ collections, forms }}>
+			{children}
+		</summariesContext.Provider>
 	);
 };

@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 
 export const CollectionsView = () => {
 	const { site } = useContext(authContext);
-	const { collections, loaded } = useContext(summariesContext);
+	const { collections } = useContext(summariesContext);
 
 	const [ searchTerm, setSearchTerm ] = useState('');
 	const history = useHistory();
@@ -44,7 +44,7 @@ export const CollectionsView = () => {
 					itemCount: { label: 'Items' },
 					modified: { label: 'Modified', columnTemplate: 2 }
 				}}
-				loading={!loaded}
+				loading={!collections}
 				identifyingField="name"
 				itemIcon={<CollectionsIcon />}
 				itemClickHandler={collection => history.push(`/collections/${collection.id}`)}

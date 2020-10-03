@@ -9,7 +9,7 @@ import { useHistory } from 'react-router-dom';
 
 export const FormsView: React.FC = () => {
 	const { site } = useContext(authContext);
-	const { forms, loaded } = useContext(summariesContext);
+	const { forms } = useContext(summariesContext);
 	const history = useHistory();
 
 	const [ searchTerm, setSearchterm ] = useState('');
@@ -43,7 +43,7 @@ export const FormsView: React.FC = () => {
 				items={getTableItems(forms || [])}
 				itemClickHandler={form => history.push(`/forms/${form.id}`)}
 				itemIcon={<FormIcon />}
-				loading={!loaded}
+				loading={!forms}
 				identifyingField="name"
 			/>
 		</AppView>

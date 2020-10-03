@@ -1,18 +1,20 @@
-import React, { useContext, useState } from 'react';
-import { authContext } from '../../context/auth-context';
+import React, { useState } from 'react';
 import { Button } from 'bdc-components';
 import './card.css';
+import { useAuth } from 'reactfire';
 
 export const SignInCard = () => {
-	const { signIn: authenticate } = useContext(authContext);
 	const [ credentials, setCredentials ] = useState({ email: '', password: '' });
 	const [ error, setError ] = useState('');
 
+	const auth = useAuth();
+
 	const signIn = async (credentials: { email: string; password: string }) => {
 		try {
-			await authenticate(credentials);
+			const { email, password } = credentials;
+			await auth.signInWithEmailAndPassword(email, password);
 		} catch (error) {
-			setError(error);
+			setError(error.message);
 		}
 	};
 

@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
-import { authContext } from '../../../context/auth-context';
+import React from 'react';
 import { ClickAwayListener } from '@material-ui/core';
 import { ExitToApp as LogoutIcon } from '@material-ui/icons';
+import { useAuth } from 'reactfire';
 import './help-menu.css';
 
 interface HelpMenuProps {
@@ -9,7 +9,7 @@ interface HelpMenuProps {
 }
 
 export const HelpMenu: React.FC<HelpMenuProps> = ({ setHelpVisibility }) => {
-	const { signOut } = useContext(authContext);
+	const signOut = useAuth().signOut;
 
 	return (
 		<ClickAwayListener onClickAway={() => setHelpVisibility(false)}>
