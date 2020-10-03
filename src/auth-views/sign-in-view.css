@@ -1,8 +1,9 @@
 section.sign-in {
 	width: 100vw;
 	height: 100vh;
-	display: grid;
-	place-items: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	margin: 0;
 	padding: 0;
 }
