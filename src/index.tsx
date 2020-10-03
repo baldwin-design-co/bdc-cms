@@ -11,12 +11,14 @@ import { AuthProvider } from './context/auth-context';
 import { SummariesProvider } from './context/summaries-context';
 import { PrivateRoute } from './private-route';
 import { FeedbackProvider } from './context/feedback-context';
+import { SignUpView } from './auth-views/sign-up-view';
 
 const App = () => (
 	<BrowserRouter basename="/cms">
 		<AuthProvider>
 			<ThemeProvider theme={bdcTheme}>
 				<Route exact path="/sign-in" component={SignInView} />
+				<Route exact path="/sign-up" component={SignUpView} />
 				<SummariesProvider>
 					<FeedbackProvider>
 						<PrivateRoute exact path="/collections" component={CollectionsView} />
