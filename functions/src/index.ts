@@ -3,7 +3,6 @@ admin.initializeApp();
 
 exports.collections = require('./collections');
 exports.forms = require('./forms');
-exports.auth = require('./auth')
 
 export type EditorRole = string //'viewer' | 'editor' | 'admin' | 'owner';
 

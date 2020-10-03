@@ -1,19 +1,9 @@
-section.sign-in {
-	width: 100vw;
-	height: 100vh;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin: 0;
-	padding: 0;
-}
-
 .sign-in-card {
 	width: 33vw;
 	max-width: 480px;
 	min-width: 360px;
 	max-height: calc(100vh - 120px);
-	padding: 36px 60px 48px;
+	padding: 36px 60px 52px;
 	background-color: var(--surfaceTwo);
 	box-shadow: 0px 4px 8px -4px black;
 	display: flex;
@@ -24,11 +14,11 @@ section.sign-in {
 	overflow-x: hidden;
 }
 
-.sign-in-card > div {
+.sign-in-card > .makeStyles-button_wrapper-6 {
 	width: 100%;
 }
 
-.sign-in-card > div > button {
+.sign-in-card > .makeStyles-button_wrapper-6 > button {
 	margin: 0;
 	width: 100%;
 }
@@ -36,5 +26,4 @@ section.sign-in {
 .error-message {
 	text-align: center;
 	padding-top: 12px;
-	max-width: 50ch;
 }

@@ -4,12 +4,14 @@ import firebase from '../firebase';
 interface AuthState {
 	user: firebase.User | null;
 	site?: string;
+	roleIndex: number;
 	signIn: (credentials: { email: string; password: string }) => Promise<void> | void;
 	signUp: (credentials: { email: string; password: string }) => Promise<void> | void;
 	signOut: () => void;
 }
 
 const defaultAuthState: AuthState = {
+	roleIndex: 0,
 	user: firebase.auth().currentUser,
 	signIn: () => {},
 	signUp: () => {},
@@ -24,10 +26,11 @@ export const AuthProvider: React.FC<{}> = props => {
 	useEffect(() => {
 		return firebase.auth().onAuthStateChanged(async user => {
 			if (user) {
-				const { site } = (await user.getIdTokenResult()).claims;
-				setAuthState({ ...authState, user, site });
+				const { role, site } = (await user.getIdTokenResult()).claims;
+				const roleIndex = [ 'viewer', 'editor', 'admin', 'owner' ].indexOf(role);
+				setAuthState({ ...authState, user, roleIndex, site });
 			} else {
-				setAuthState({ ...authState, user, site: undefined });
+				setAuthState({ ...authState, user, roleIndex: 0, site: undefined });
 			}
 		});
 		// eslint-disable-next-line
@@ -39,8 +42,8 @@ export const AuthProvider: React.FC<{}> = props => {
 	};
 
 	const signUp = async (credentials: { email: string; password: string }) => {
-		const { email, password } = credentials;
-		await firebase.auth().createUserWithEmailAndPassword(email, password);
+		const acceptInvitation = firebase.functions().httpsCallable('editors-AcceptInvitation');
+		await acceptInvitation(credentials);
 	};
 
 	const signOut = () => firebase.auth().signOut();
