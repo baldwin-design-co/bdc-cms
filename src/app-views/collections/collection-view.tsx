@@ -1,14 +1,14 @@
+import { DeleteOutline as DeleteIcon, NoteAddOutlined as NewItemIcon } from '@material-ui/icons';
+import { DataTable, FormErrors, FormModal, FormValues, InitialValues, PageHeader } from 'bdc-components';
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { CollectionDoc, FieldStructure, FieldStructures, ItemData, ItemDoc, ItemStatus, ItemSummary } from '../../firestore';
-import { DataTable, FormErrors, FormModal, FormValues, InitialValues, PageHeader } from 'bdc-components';
-import { NoteAddOutlined as NewItemIcon, DeleteOutline as DeleteIcon } from '@material-ui/icons';
+import uniqId from 'uniqid';
 import { authContext } from '../../context/auth-context';
+import { feedbackContext } from '../../context/feedback-context';
 import firebase from '../../firebase';
+import { CollectionDoc, FieldStructure, FieldStructures, ItemData, ItemDoc, ItemStatus, ItemSummary } from '../../firestore';
 import { AppView } from '../app-view';
 import { formatDate } from './format-date';
-import uniqId from 'uniqid'
-import { feedbackContext } from '../../context/feedback-context';
 
 export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = props => {
 	const { site } = useContext(authContext);
@@ -19,17 +19,19 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 	const [ currentItem, setCurrentItem ] = useState<Item | NewItem | undefined>()
 	const [ collection, setCollection ] = useState<CollectionDoc | undefined>()
 
+	const collectionName = props.match.params.page
+
 	useEffect(() => (
 		firebase.firestore().collection('sites')
 			.doc(site)
 			.collection('collections')
-			.doc(props.match.params.page)
+			.doc(collectionName)
 			.onSnapshot(docSnap => {
 				setCollection(docSnap.data() as CollectionDoc);
 				setLoading(false)
 			}
 		)),
-		[ site, props.match.params.page ]
+		[ site, collectionName ]
 	);
 
 	const uploadFile = (storageRef: firebase.storage.Reference, file: File) => {
@@ -64,7 +66,7 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 			} else if (fieldStructure.type === 'date' && value instanceof Date) {
 				itemData[field] = firebase.firestore.Timestamp.fromDate(value)
 			} else {
-				itemData[field] = value as string | string[] | null
+				itemData[field] = value
 			}
 		}
 
@@ -142,11 +144,7 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 				}
 				
 				await firebase.firestore()
-					.collection('sites')
-					.doc(site)
-					.collection('collections')
-					.doc(props.match.params.page)
-					.collection('items')
+					.collection(`sites/${site}/collections/${collectionName}/items`)
 					.doc(docId)
 					.set(itemDoc)
 				
@@ -194,11 +192,7 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 				}
 
 				await firebase.firestore()
-					.collection('sites')
-					.doc(site)
-					.collection('collections')
-					.doc(props.match.params.page)
-					.collection('items')
+					.collection(`sites/${site}/collections/${collectionName}/items`)
 					.doc(this.id)
 					.update(itemDoc)
 
@@ -227,7 +221,7 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 					.collection('sites')
 					.doc(site)
 					.collection('collections')
-					.doc(props.match.params.page)
+					.doc(collectionName)
 					.collection('items')
 					.doc(this.id)
 					.delete()
@@ -276,7 +270,7 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 	return (
 		<AppView>
 			<PageHeader
-				title={collection?.name || props.match.params.page}
+				title={collection?.name || collectionName}
 				action={() => setCurrentItem(new NewItem(collection?.fieldStructures || {}))}
 				actionLabel={<NewItemIcon fontSize='small' />}
 				search={setSearchTerm}

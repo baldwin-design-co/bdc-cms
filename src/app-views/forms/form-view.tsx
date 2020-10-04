@@ -1,10 +1,10 @@
-import { DataTable, PageHeader, Modal } from 'bdc-components';
+import { DataTable, Modal, PageHeader } from 'bdc-components';
 import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { SubmissionSummary, FormDoc, SubmissionSummaryData } from '../../firestore';
 import { authContext } from '../../context/auth-context';
 import { feedbackContext } from '../../context/feedback-context';
 import firebase from '../../firebase';
+import { FormDoc, SubmissionSummary, SubmissionSummaryData } from '../../firestore';
 import { AppView } from '../app-view';
 
 export const FormView: React.FC<RouteComponentProps<{ page: string }>> = props => {
@@ -14,37 +14,35 @@ export const FormView: React.FC<RouteComponentProps<{ page: string }>> = props =
 	const [ form, setForm ] = useState<FormDoc | undefined>();
 	const [ currentSubmission, setCurrentSubmission ] = useState<Submission | undefined>()
 
+	const formName = props.match.params.page
+
 	useEffect(() => (
-		firebase.firestore().collection('sites')
-			.doc(site)
-			.collection('forms')
-			.doc(props.match.params.page)
+		firebase.firestore()
+			.collection(`sites/${site}/forms`)
+			.doc(formName)
 			.onSnapshot(docSnap => {
 				setForm(docSnap.data() as FormDoc)
 			}
-	)), [ site, props.match.params.page ]);
+	)), [ site, formName ]);
 
 	class Submission implements SubmissionSummary {
 		id: string
 		submittedOn: firebase.firestore.Timestamp
 		data: SubmissionSummaryData
-		docRef: firebase.firestore.DocumentReference
 
 		constructor (submission: SubmissionSummary) {
 			this.id = submission.id
 			this.submittedOn = submission.submittedOn
 			this.data = submission.data
-			this.docRef = firebase.firestore().collection('sites')
-				.doc(site)
-				.collection('forms')
-				.doc(props.match.params.page)
-				.collection('submissions')
-				.doc(submission.id)
 		}
 
 		delete = async () => {
 			try {
-				await this.docRef.delete()
+				await firebase.firestore()
+					.collection(`sites/${site}/forms/${formName}/submissions`)
+					.doc(this.id)
+					.delete()
+
 				setCurrentSubmission(undefined)
 				setFeedback(true, 'Submission deleted', 'success')
 			} catch {
@@ -54,6 +52,13 @@ export const FormView: React.FC<RouteComponentProps<{ page: string }>> = props =
 
 		Modal = () => {
 			const fields = form?.fieldOrder || []
+			const submissionData = fields.map((field, i) => (
+				<p key={i}>
+					<b>{field}: </b>
+					{this.data[field]}
+					<br/><br/>
+				</p>
+			))
 
 			return (
 				<Modal
@@ -61,13 +66,7 @@ export const FormView: React.FC<RouteComponentProps<{ page: string }>> = props =
 					onClose={() => setCurrentSubmission(undefined)}
 					actions={[ { action: this.delete, label: 'delete' }]}
 				>
-					{fields.map((field, i) => (
-						<p key={i}>
-							<b>{field}: </b>
-							{this.data[field]}
-							<br/><br/>
-						</p>
-					))}
+					{submissionData}
 				</Modal>
 			)
 		}
@@ -77,7 +76,7 @@ export const FormView: React.FC<RouteComponentProps<{ page: string }>> = props =
 
 	return (
 		<AppView>
-			<PageHeader title={props.match.params.page} />
+			<PageHeader title={formName} />
 
 			<DataTable
 				items={submissions}
