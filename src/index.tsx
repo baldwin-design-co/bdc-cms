@@ -1,22 +1,23 @@
+import { bdcTheme, ThemeProvider } from 'bdc-components';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { bdcTheme, ThemeProvider } from 'bdc-components';
 import { BrowserRouter, Route } from 'react-router-dom';
 import { CollectionView } from './app-views/collections/collection-view';
 import { CollectionsView } from './app-views/collections/collections-view';
 import { FormView } from './app-views/forms/form-view';
 import { FormsView } from './app-views/forms/forms-view';
 import { SignInView } from './auth-views/sign-in-view';
+import { SignUpView } from './auth-views/sign-up-view';
 import { AuthProvider } from './context/auth-context';
+import { FeedbackProvider } from './context/feedback-context';
 import { SummariesProvider } from './context/summaries-context';
 import { PrivateRoute } from './private-route';
-import { FeedbackProvider } from './context/feedback-context';
-import { SignUpView } from './auth-views/sign-up-view';
 
 const App = () => (
-	<BrowserRouter basename="/cms">
+	<BrowserRouter>
 		<AuthProvider>
 			<ThemeProvider theme={bdcTheme}>
+				<PrivateRoute exact path="/" component={CollectionsView} />
 				<Route exact path="/sign-in" component={SignInView} />
 				<Route exact path="/sign-up" component={SignUpView} />
 				<SummariesProvider>
