@@ -22,9 +22,8 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 	const collectionName = props.match.params.page
 
 	useEffect(() => (
-		firebase.firestore().collection('sites')
-			.doc(site)
-			.collection('collections')
+		firebase.firestore()
+			.collection(`sites/${site}/collections`)
 			.doc(collectionName)
 			.onSnapshot(docSnap => {
 				setCollection(docSnap.data() as CollectionDoc);
@@ -218,11 +217,7 @@ export const CollectionView: React.FC<RouteComponentProps<{ page: string }>> = p
 				}
 
 				await firebase.firestore()
-					.collection('sites')
-					.doc(site)
-					.collection('collections')
-					.doc(collectionName)
-					.collection('items')
+					.collection(`sites/${site}/collections/${collectionName}/items`)
 					.doc(this.id)
 					.delete()
 
